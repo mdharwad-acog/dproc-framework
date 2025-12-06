@@ -1,0 +1,34 @@
+# 📊 {{reportName}}
+
+**Company:** {{customFields.company}}  
+**Period:** {{customFields.period}}  
+**Generated:** {{metadata.ingested_at}}
+
+---
+
+## 🎯 Executive Summary
+
+{{executive_summary}}
+
+---
+
+## 📈 Key Performance Indicators
+
+| Metric | Value |
+|--------|-------|
+| 💰 **Total Revenue** | ${{computedFields.total_revenue}} |
+| 🏆 **Top Product** | {{computedFields.top_product}} |
+| 💵 **Avg Deal Size** | ${{computedFields.avg_revenue}} |
+| 📦 **Total Orders** | {{stats.rowCount}} |
+
+---
+
+## 📊 Data Overview
+
+- **Source:** {{metadata.source_file}}
+- **Records Analyzed:** {{metadata.record_count}}
+- **Columns:** {{stats.columnCount}}
+
+---
+
+*Report generated with LLM Data Framework*

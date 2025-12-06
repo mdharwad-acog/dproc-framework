@@ -1,0 +1,14 @@
+[
+  {
+    "date": "2025-01-01",
+    "product": "Widget A",
+    "revenue": 1500,
+    "region": "US-WEST"
+  },
+  {
+    "date": "2025-01-02",
+    "product": "Gadget B",
+    "revenue": 2300,
+    "region": "US-EAST"
+  }
+]

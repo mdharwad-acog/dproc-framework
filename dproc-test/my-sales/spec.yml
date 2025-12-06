@@ -1,0 +1,12 @@
+id: sales-performance-report
+templateFile: ./templates/sales-report.njk
+variables:
+  - name: executive_summary
+    type: markdown
+    promptFile: ./prompts/executive-summary.md
+    inputs:
+      - bundle.samples.main
+      - bundle.computedFields.total_revenue
+      - bundle.computedFields.avg_revenue
+      - bundle.computedFields.top_product
+      - bundle.stats
