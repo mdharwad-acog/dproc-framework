@@ -1,129 +1,101 @@
 import { Command } from "commander";
 import inquirer from "inquirer";
-import { writeFileSync, mkdirSync, existsSync, cpSync, readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { join } from "path";
 import chalk from "chalk";
 import * as YAML from "yaml";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 export const initCommand = new Command("init")
   .description("Initialize a new report project")
   .argument("[name]", "Project name", "my-report")
   .option("-t, --template <type>", "Template type (sales|generic)")
-  .action(async (name: string, options: { template?: string }) => {
-    console.log(chalk.blue(`\n🚀 Initializing project: ${name}\n`)); // Corrected emoji
+  .option(
+    "-d, --dir <directory>",
+    "Custom directory (default: current directory)"
+  )
+  .action(
+    async (name: string, options: { template?: string; dir?: string }) => {
+      console.log(chalk.blue(`\n🚀 Initializing project: ${name}\n`));
 
-    const projectDir = join(process.cwd(), name);
+      // Create in current directory or specified directory
+      const baseDir = options.dir || process.cwd();
+      const projectDir = join(baseDir, name);
 
-    if (existsSync(projectDir)) {
-      console.error(chalk.red(`✖ Directory ${name} already exists`)); // Corrected emoji
-      process.exit(1);
+      if (existsSync(projectDir)) {
+        console.error(chalk.red(`❌ Directory ${name} already exists`));
+        process.exit(1);
+      }
+
+      // Ask for template if not specified
+      let templateType = options.template || "generic";
+
+      if (!options.template) {
+        const answer = await inquirer.prompt([
+          {
+            type: "list",
+            name: "template",
+            message: "Select a report template:",
+            choices: [
+              {
+                name: "📊 Sales Performance Report - Revenue, growth, product analysis",
+                value: "sales",
+              },
+              {
+                name: "📝 Generic Report - Start from scratch",
+                value: "generic",
+              },
+            ],
+          },
+        ]);
+        templateType = answer.template;
+      }
+
+      // Create directory structure
+      mkdirSync(projectDir, { recursive: true });
+      mkdirSync(join(projectDir, "data"), { recursive: true });
+      mkdirSync(join(projectDir, "prompts"), { recursive: true });
+      mkdirSync(join(projectDir, "templates"), { recursive: true });
+      mkdirSync(join(projectDir, "output"), { recursive: true });
+
+      if (templateType === "sales") {
+        createSalesProject(projectDir, name);
+      } else {
+        createGenericProject(projectDir, name);
+      }
+
+      // Create README
+      const readme = [
+        "cd " + name,
+        "llm-framework generate",
+        "```",
+        "",
+        "## Files",
+        "",
+        "- `llm-framework.config.json` - Project configuration",
+        "- `spec.yml` - Report structure definition",
+        "- `data/` - Your datasets",
+        "- `prompts/` - LLM prompt templates",
+        "- `templates/` - Report layout templates",
+        "- `output/` - Generated reports",
+        "",
+        "## Configuration",
+        "",
+        "Configure API keys once (stored globally):",
+        "```bash",
+        "llm-framework setup",
+        "```",
+      ].join("\n");
+
+      writeFileSync(join(projectDir, "README.md"), readme);
+
+      console.log(chalk.green(`✅ Project created: ${projectDir}\n`));
+      console.log(chalk.blue("➡️ Next steps:"));
+      console.log(`  cd ${name}`);
+      console.log(`  llm-framework generate       # Generate report\n`);
     }
-
-    // Ask for template if not specified
-    let templateType = options.template || "generic";
-
-    if (!options.template) {
-      const answer = await inquirer.prompt([
-        {
-          type: "list",
-          name: "template",
-          message: "Select a report template:",
-          choices: [
-            {
-              name: "📈 Sales Performance Report - Revenue, growth, product analysis", // Corrected emoji
-              value: "sales",
-            },
-            {
-              name: "📝 Generic Report - Start from scratch", // Corrected emoji
-              value: "generic",
-            },
-          ],
-        },
-      ]);
-      templateType = answer.template;
-    }
-
-    // Create directory structure
-    mkdirSync(projectDir, { recursive: true });
-    mkdirSync(join(projectDir, "data"));
-    mkdirSync(join(projectDir, "prompts"));
-    mkdirSync(join(projectDir, "templates"));
-    mkdirSync(join(projectDir, "output"));
-
-    if (templateType === "sales") {
-      // Sales template
-      createSalesProject(projectDir, name);
-    } else {
-      // Generic template
-      createGenericProject(projectDir, name);
-    }
-
-    // Create README
-    // SYNTACTICAL ERROR CORRECTED HERE
-    const readme = [
-      `# LLM Data Report: ${name}`, // Added dynamic header
-      "",
-      "This is an LLM Data Framework project.",
-      "",
-      "## Getting Started",
-      "",
-      "1. Install dependencies and set up the environment:",
-      "   ```bash",
-      "   llm-framework setup",
-      "   ```",
-      "",
-      "2. Add your data to `data/` directory",
-      "",
-      "3. Generate report:",
-      "   ```bash",
-      "   llm-framework generate",
-      "   ```",
-      "",
-      "## Files",
-      "",
-      "- `llm-framework.config.json` - Data sources and field definitions",
-      "- `spec.yml` - Report structure and LLM variables",
-      "- `prompts/` - LLM prompt templates",
-      "- `templates/` - Report layout templates",
-      "- `data/` - Your datasets",
-      "- `output/` - Generated reports",
-      "",
-      "## Customize",
-      "",
-      "Edit files to:",
-      "- Change data sources in config",
-      "- Add custom/computed fields in config",
-      "- Modify report structure in spec.yml",
-      "- Adjust prompts for better output",
-      "- Update template layout",
-    ].join("\n");
-
-    writeFileSync(join(projectDir, "README.md"), readme);
-
-    console.log(chalk.green(`✅ Project created: ${name}/\n`)); // Corrected emoji
-    console.log(chalk.blue("📂 Structure:")); // Corrected emoji
-    console.log(`  ${name}/`);
-    console.log(`  ├── llm-framework.config.json`); // Corrected structure character
-    console.log(`  ├── spec.yml`);
-    console.log(`  ├── data/`);
-    console.log(`  ├── prompts/`);
-    console.log(`  ├── templates/`);
-    console.log(`  └── output/\n`); // Corrected structure character
-
-    console.log(chalk.blue("➡️ Next steps:")); // Corrected emoji
-    console.log(`  cd ${name}`);
-    console.log(
-      `  llm-framework setup          # Configure API keys (if needed)`
-    );
-    console.log(`  llm-framework generate       # Generate report\n`);
-  });
+  );
 
 function createGenericProject(projectDir: string, name: string) {
-  // Config
   const config = {
     reportName: `${name} Report`,
     author: "",
@@ -132,9 +104,7 @@ function createGenericProject(projectDir: string, name: string) {
       custom: [
         {
           name: "report_date",
-          // The split("T") here will return an array, which might be incorrect for a single value.
-          // Assuming the intent was to get the date part.
-          value: new Date().toISOString().split("T")[0],
+          value: new Date().toISOString().split("T"),
         },
       ],
       computed: [
@@ -154,7 +124,6 @@ function createGenericProject(projectDir: string, name: string) {
     JSON.stringify(config, null, 2)
   );
 
-  // Spec
   const spec = {
     id: `${name}-report`,
     templateFile: "./templates/report.njk",
@@ -170,7 +139,6 @@ function createGenericProject(projectDir: string, name: string) {
 
   writeFileSync(join(projectDir, "spec.yml"), YAML.stringify(spec));
 
-  // Prompt
   const promptContent = [
     "# Report Summary",
     "",
@@ -196,7 +164,6 @@ function createGenericProject(projectDir: string, name: string) {
 
   writeFileSync(join(projectDir, "prompts", "summary.md"), promptContent);
 
-  // Template
   const templateContent = [
     "# {{reportName}}",
     "",
@@ -225,7 +192,6 @@ function createGenericProject(projectDir: string, name: string) {
 
   writeFileSync(join(projectDir, "templates", "report.njk"), templateContent);
 
-  // Sample data
   const sampleData = [
     "date,product,revenue,region",
     "2025-01-01,Widget A,1500,US-WEST",
@@ -239,7 +205,6 @@ function createGenericProject(projectDir: string, name: string) {
 }
 
 function createSalesProject(projectDir: string, name: string) {
-  // Config
   const config = {
     reportName: `${name} Sales Report`,
     author: "",
@@ -267,7 +232,6 @@ function createSalesProject(projectDir: string, name: string) {
     JSON.stringify(config, null, 2)
   );
 
-  // Spec
   const spec = {
     id: "sales-performance-report",
     templateFile: "./templates/sales-report.njk",
@@ -289,7 +253,6 @@ function createSalesProject(projectDir: string, name: string) {
 
   writeFileSync(join(projectDir, "spec.yml"), YAML.stringify(spec));
 
-  // Prompt
   const promptContent = [
     "# Executive Summary Generation",
     "",
@@ -321,9 +284,8 @@ function createSalesProject(projectDir: string, name: string) {
     promptContent
   );
 
-  // Template
   const templateContent = [
-    "# 📈 {{reportName}}", // Corrected emoji
+    "# 📊 {{reportName}}",
     "",
     "**Company:** {{customFields.company}}  ",
     "**Period:** {{customFields.period}}  ",
@@ -331,24 +293,24 @@ function createSalesProject(projectDir: string, name: string) {
     "",
     "---",
     "",
-    "## 🎯 Executive Summary", // Corrected emoji
+    "## 🎯 Executive Summary",
     "",
     "{{executive_summary}}",
     "",
     "---",
     "",
-    "## 📊 Key Performance Indicators", // Corrected emoji
+    "## 📈 Key Performance Indicators",
     "",
     "| Metric | Value |",
     "|--------|-------|",
-    "| 💰 **Total Revenue** | ${{computedFields.total_revenue}} |", // Corrected emoji
-    "| 🏆 **Top Product** | {{computedFields.top_product}} |", // Corrected emoji
-    "| 💲 **Avg Deal Size** | ${{computedFields.avg_revenue}} |", // Corrected emoji
-    "| 📦 **Total Orders** | {{stats.rowCount}} |", // Corrected emoji
+    "| 💰 **Total Revenue** | ${{computedFields.total_revenue}} |",
+    "| 🏆 **Top Product** | {{computedFields.top_product}} |",
+    "| 💵 **Avg Deal Size** | ${{computedFields.avg_revenue}} |",
+    "| 📦 **Total Orders** | {{stats.rowCount}} |",
     "",
     "---",
     "",
-    "## 📘 Data Overview", // Corrected emoji
+    "## 📊 Data Overview",
     "",
     "- **Source:** {{metadata.source_file}}",
     "- **Records Analyzed:** {{metadata.record_count}}",
@@ -364,7 +326,6 @@ function createSalesProject(projectDir: string, name: string) {
     templateContent
   );
 
-  // Sample sales data
   const salesData = [
     "date,product,revenue,region,sales_rep",
     "2025-01-15,Enterprise Widget Pro,15000,US-WEST,Alice Johnson",

@@ -1,53 +1,76 @@
 {
   "name": "llm-data-framework",
   "version": "0.1.0",
-  "description": "Generic data to LLM-powered structured reports",
+  "description": "LLM-powered data report generation - CLI + Web",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/core/index.js",
+  "types": "./dist/core/index.d.ts",
   "bin": {
-    "llm-framework": "./bin/llm-framework.js"
+    "dproc": "./bin/dproc-framework.js"
   },
   "scripts": {
-    "test": "pnpm build && node --test --experimental-test-coverage tests/**/*.test.js",
-    "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit",
-    "build": "tsc && pnpm copy-templates",
-    "copy-templates": "mkdir -p dist/templates && cp -r src/templates/builtin dist/templates/",
-    "dev": "tsx src/cli/index.ts",
-    "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
+    "build": "pnpm build:cli && pnpm build:web",
+    "build:cli": "tsc -p tsconfig.cli.json && pnpm copy-templates",
+    "build:web": "cd web && vite build",
+    "dev:cli": "tsx src/cli/index.ts",
+    "dev:web": "cd web && vite",
+    "test": "pnpm build:cli && node --test tests/**/*.test.js",
+    "clean": "rm -rf dist web/dist",
+    "copy-templates": "mkdir -p dist/templates && cp -r src/templates/builtin dist/templates/"
   },
   "keywords": [
     "llm",
+    "ai",
     "reports",
-    "data-processing",
-    "ai"
+    "data-processing"
   ],
   "author": "mdharwad-acog",
-  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "packageManager": "pnpm@10.24.0",
   "dependencies": {
     "@ai-sdk/google": "^2.0.44",
     "@ai-sdk/openai": "^2.0.77",
     "ai": "^5.0.108",
     "chalk": "^5.6.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "commander": "^14.0.2",
+    "cors": "^2.8.5",
     "csv-parse": "^6.1.0",
     "debug": "^4.4.3",
-    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "inquirer": "^13.0.2",
+    "lucide-react": "^0.556.0",
     "marked": "^17.0.1",
     "nunjucks": "^3.2.4",
     "ora": "^9.0.0",
     "playwright": "^1.57.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.10.1",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^3.4.0",
     "yaml": "^2.8.2",
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "@types/cors": "^2.8.19",
     "@types/debug": "^4.1.12",
+    "@types/express": "^5.0.6",
     "@types/node": "^24.10.1",
     "@types/nunjucks": "^3.2.6",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "react-router-dom": "^7.10.1",
+    "tailwindcss": "^4.1.17",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

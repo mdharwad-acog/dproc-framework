@@ -8,6 +8,7 @@ import { configCommand } from "./commands/config.js";
 import { initCommand } from "./commands/init.js";
 import { generateCommand } from "./commands/generate.js";
 import { validateCommand } from "./commands/validate.js";
+import { serveCommand } from "./commands/serve.js";
 
 const debug = createDebug("framework:cli");
 
@@ -34,6 +35,7 @@ program.addCommand(configCommand);
 program.addCommand(initCommand);
 program.addCommand(generateCommand);
 program.addCommand(validateCommand);
+program.addCommand(serveCommand);
 
 // Error handling
 program.exitOverride();

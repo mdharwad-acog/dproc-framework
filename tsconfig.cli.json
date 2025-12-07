@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/cli/**/*",
+    "src/core/**/*",
+    "src/connectors/**/*",
+    "src/renderers/**/*",
+    "src/services/**/*",
+    "src/server/**/*"
+  ],
+  "exclude": ["node_modules", "dist", "web"]
+}

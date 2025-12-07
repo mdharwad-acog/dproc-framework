@@ -7,6 +7,7 @@ import {
 import { PromptRenderer } from "./prompt-renderer.js";
 import { SpecLoader } from "./spec-loader.js";
 import { LLMClient } from "./types.js";
+import { ExportManager } from "../renderers/export-manager.js";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import nunjucks from "nunjucks";
@@ -21,10 +22,12 @@ interface ReportContext {
 export class ReportEngine {
   private promptRenderer: PromptRenderer;
   private templateEnv: nunjucks.Environment;
+  private exportManager: ExportManager;
 
   constructor(private llmClient: LLMClient) {
     this.promptRenderer = new PromptRenderer();
     this.templateEnv = nunjucks.configure({ autoescape: false });
+    this.exportManager = new ExportManager();
     this.registerFilters();
   }
 
@@ -127,16 +130,21 @@ export class ReportEngine {
       context
     );
 
-    // Save report
+    // Ensure output directory exists
     const outputDir = config.output.destination;
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir, { recursive: true });
     }
 
-    const reportPath = join(outputDir, "report.md");
-    writeFileSync(reportPath, reportMarkdown);
-    debug("Report saved to: %s", reportPath);
+    // Export to all configured formats
+    debug("Exporting to formats: %o", config.output.formats);
+    await this.exportManager.exportAll(
+      reportMarkdown,
+      config.output.formats,
+      outputDir
+    );
 
+    debug("Report generation complete!");
     return reportMarkdown;
   }
 

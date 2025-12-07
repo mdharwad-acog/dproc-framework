@@ -1,6 +1,10 @@
 .
 ├── bin
 │   └── dproc-framework.js
+├── components
+│   └── ui
+│       ├── button.tsx
+│       └── card.tsx
 ├── dist
 │   ├── cli
 │   │   ├── commands
@@ -133,7 +137,32 @@
 │               └── templates
 │                   └── sales-report.njk
 ├── dproc-test
-│   └── my-sales
+│   ├── my-sales
+│   │   ├── data
+│   │   │   └── sample-sales.csv
+│   │   ├── llm-framework.config.json
+│   │   ├── output
+│   │   │   ├── report.html
+│   │   │   ├── report.md
+│   │   │   └── report.pdf
+│   │   ├── prompts
+│   │   │   └── executive-summary.md
+│   │   ├── README.md
+│   │   ├── spec.yml
+│   │   └── templates
+│   │       └── sales-report.njk
+│   ├── test-cli-report
+│   │   ├── data
+│   │   │   └── sample-sales.csv
+│   │   ├── llm-framework.config.json
+│   │   ├── output
+│   │   ├── prompts
+│   │   │   └── executive-summary.md
+│   │   ├── README.md
+│   │   ├── spec.yml
+│   │   └── templates
+│   │       └── sales-report.njk
+│   └── test-local
 │       ├── data
 │       │   └── sample-sales.csv
 │       ├── llm-framework.config.json
@@ -148,10 +177,35 @@
 │       └── templates
 │           └── sales-report.njk
 ├── files.txt
+├── lib
+│   └── utils.ts
+├── next.config.mjs
+├── next-env.d.ts
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
+├── postcss.config.mjs
+├── public
 ├── src
+│   ├── app
+│   │   ├── api
+│   │   │   └── projects
+│   │   │       └── [id]
+│   │   │           ├── download
+│   │   │           │   └── route.ts
+│   │   │           └── generate
+│   │   │               └── route.ts
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── projects
+│   │       ├── [id]
+│   │       │   ├── generate
+│   │       │   │   └── page.tsx
+│   │       │   ├── page.tsx
+│   │       │   └── reports
+│   │       │       └── page.tsx
+│   │       └── page.tsx
 │   ├── cli
 │   │   ├── commands
 │   │   │   ├── config.ts
@@ -185,6 +239,8 @@
 │   │   ├── export-manager.ts
 │   │   ├── html-renderer.ts
 │   │   └── pdf-renderer.ts
+│   ├── services
+│   │   └── project-service.ts
 │   └── templates
 │       └── builtin
 │           ├── customer-insights
@@ -212,6 +268,8 @@
 │       ├── bundle-loader.test.js
 │       ├── connectors.test.js
 │       └── report-engine.test.js
+├── tsconfig.cli.json
+├── tsconfig.cli.tsbuildinfo
 └── tsconfig.json
 
-43 directories, 172 files
+68 directories, 205 files

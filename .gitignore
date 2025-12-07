@@ -5,3 +5,14 @@ dist/
 .DS_Store
 output/
 .llm-framework/
+# Next.js
+/.next/
+/out/
+
+# Environment
+.env*.local
+# Environment variables
+.env
+.env.local
+.env.*.local
+dproc-test
