@@ -5,212 +5,19 @@
 │   └── ui
 │       ├── button.tsx
 │       └── card.tsx
-├── dist
-│   ├── cli
-│   │   ├── commands
-│   │   │   ├── config.d.ts
-│   │   │   ├── config.d.ts.map
-│   │   │   ├── config.js
-│   │   │   ├── config.js.map
-│   │   │   ├── generate.d.ts
-│   │   │   ├── generate.d.ts.map
-│   │   │   ├── generate.js
-│   │   │   ├── generate.js.map
-│   │   │   ├── init.d.ts
-│   │   │   ├── init.d.ts.map
-│   │   │   ├── init.js
-│   │   │   ├── init.js.map
-│   │   │   ├── setup.d.ts
-│   │   │   ├── setup.d.ts.map
-│   │   │   ├── setup.js
-│   │   │   ├── setup.js.map
-│   │   │   ├── use.d.ts
-│   │   │   ├── use.d.ts.map
-│   │   │   ├── use.js
-│   │   │   ├── use.js.map
-│   │   │   ├── validate.d.ts
-│   │   │   ├── validate.d.ts.map
-│   │   │   ├── validate.js
-│   │   │   └── validate.js.map
-│   │   ├── index.d.ts
-│   │   ├── index.d.ts.map
-│   │   ├── index.js
-│   │   ├── index.js.map
-│   │   └── utils
-│   │       ├── progress.d.ts
-│   │       ├── progress.d.ts.map
-│   │       ├── progress.js
-│   │       └── progress.js.map
-│   ├── connectors
-│   │   ├── csv-connector.d.ts
-│   │   ├── csv-connector.d.ts.map
-│   │   ├── csv-connector.js
-│   │   ├── csv-connector.js.map
-│   │   ├── json-connector.d.ts
-│   │   ├── json-connector.d.ts.map
-│   │   ├── json-connector.js
-│   │   ├── json-connector.js.map
-│   │   ├── universal-connector.d.ts
-│   │   ├── universal-connector.d.ts.map
-│   │   ├── universal-connector.js
-│   │   └── universal-connector.js.map
-│   ├── core
-│   │   ├── bundle-loader.d.ts
-│   │   ├── bundle-loader.d.ts.map
-│   │   ├── bundle-loader.js
-│   │   ├── bundle-loader.js.map
-│   │   ├── config-manager.d.ts
-│   │   ├── config-manager.d.ts.map
-│   │   ├── config-manager.js
-│   │   ├── config-manager.js.map
-│   │   ├── formula-engine.d.ts
-│   │   ├── formula-engine.d.ts.map
-│   │   ├── formula-engine.js
-│   │   ├── formula-engine.js.map
-│   │   ├── index.d.ts
-│   │   ├── index.d.ts.map
-│   │   ├── index.js
-│   │   ├── index.js.map
-│   │   ├── llm-client.d.ts
-│   │   ├── llm-client.d.ts.map
-│   │   ├── llm-client.js
-│   │   ├── llm-client.js.map
-│   │   ├── nunjucks-filters.d.ts
-│   │   ├── nunjucks-filters.d.ts.map
-│   │   ├── nunjucks-filters.js
-│   │   ├── nunjucks-filters.js.map
-│   │   ├── project-config.d.ts
-│   │   ├── project-config.d.ts.map
-│   │   ├── project-config.js
-│   │   ├── project-config.js.map
-│   │   ├── prompt-renderer.d.ts
-│   │   ├── prompt-renderer.d.ts.map
-│   │   ├── prompt-renderer.js
-│   │   ├── prompt-renderer.js.map
-│   │   ├── report-engine.d.ts
-│   │   ├── report-engine.d.ts.map
-│   │   ├── report-engine.js
-│   │   ├── report-engine.js.map
-│   │   ├── secretes-manager.d.ts
-│   │   ├── secretes-manager.d.ts.map
-│   │   ├── secretes-manager.js
-│   │   ├── secretes-manager.js.map
-│   │   ├── secrets-manager.d.ts
-│   │   ├── secrets-manager.d.ts.map
-│   │   ├── secrets-manager.js
-│   │   ├── secrets-manager.js.map
-│   │   ├── spec-loader.d.ts
-│   │   ├── spec-loader.d.ts.map
-│   │   ├── spec-loader.js
-│   │   ├── spec-loader.js.map
-│   │   ├── types.d.ts
-│   │   ├── types.d.ts.map
-│   │   ├── types.js
-│   │   ├── types.js.map
-│   │   ├── validators.d.ts
-│   │   ├── validators.d.ts.map
-│   │   ├── validators.js
-│   │   └── validators.js.map
-│   ├── renderers
-│   │   ├── export-manager.d.ts
-│   │   ├── export-manager.d.ts.map
-│   │   ├── export-manager.js
-│   │   ├── export-manager.js.map
-│   │   ├── html-renderer.d.ts
-│   │   ├── html-renderer.d.ts.map
-│   │   ├── html-renderer.js
-│   │   ├── html-renderer.js.map
-│   │   ├── pdf-renderer.d.ts
-│   │   ├── pdf-renderer.d.ts.map
-│   │   ├── pdf-renderer.js
-│   │   └── pdf-renderer.js.map
-│   └── templates
-│       └── builtin
-│           ├── customer-insights
-│           ├── financial-summary
-│           └── sales-analysis
-│               ├── config.json
-│               ├── prompts
-│               │   ├── executive-summary.md
-│               │   ├── key-insights.md
-│               │   └── recommendations.md
-│               └── templates
-│                   └── sales-report.njk
-├── dproc-test
-│   ├── my-sales
-│   │   ├── data
-│   │   │   └── sample-sales.csv
-│   │   ├── llm-framework.config.json
-│   │   ├── output
-│   │   │   ├── report.html
-│   │   │   ├── report.md
-│   │   │   └── report.pdf
-│   │   ├── prompts
-│   │   │   └── executive-summary.md
-│   │   ├── README.md
-│   │   ├── spec.yml
-│   │   └── templates
-│   │       └── sales-report.njk
-│   ├── test-cli-report
-│   │   ├── data
-│   │   │   └── sample-sales.csv
-│   │   ├── llm-framework.config.json
-│   │   ├── output
-│   │   ├── prompts
-│   │   │   └── executive-summary.md
-│   │   ├── README.md
-│   │   ├── spec.yml
-│   │   └── templates
-│   │       └── sales-report.njk
-│   └── test-local
-│       ├── data
-│       │   └── sample-sales.csv
-│       ├── llm-framework.config.json
-│       ├── output
-│       │   ├── report.html
-│       │   ├── report.md
-│       │   └── report.pdf
-│       ├── prompts
-│       │   └── executive-summary.md
-│       ├── README.md
-│       ├── spec.yml
-│       └── templates
-│           └── sales-report.njk
 ├── files.txt
 ├── lib
-│   └── utils.ts
-├── next.config.mjs
-├── next-env.d.ts
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
-├── postcss.config.mjs
 ├── public
 ├── src
-│   ├── app
-│   │   ├── api
-│   │   │   └── projects
-│   │   │       └── [id]
-│   │   │           ├── download
-│   │   │           │   └── route.ts
-│   │   │           └── generate
-│   │   │               └── route.ts
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   └── projects
-│   │       ├── [id]
-│   │       │   ├── generate
-│   │       │   │   └── page.tsx
-│   │       │   ├── page.tsx
-│   │       │   └── reports
-│   │       │       └── page.tsx
-│   │       └── page.tsx
 │   ├── cli
 │   │   ├── commands
 │   │   │   ├── config.ts
 │   │   │   ├── generate.ts
 │   │   │   ├── init.ts
+│   │   │   ├── serve.ts
 │   │   │   ├── setup.ts
 │   │   │   ├── use.ts
 │   │   │   └── validate.ts
@@ -239,6 +46,8 @@
 │   │   ├── export-manager.ts
 │   │   ├── html-renderer.ts
 │   │   └── pdf-renderer.ts
+│   ├── server
+│   │   └── index.ts
 │   ├── services
 │   │   └── project-service.ts
 │   └── templates
@@ -270,6 +79,28 @@
 │       └── report-engine.test.js
 ├── tsconfig.cli.json
 ├── tsconfig.cli.tsbuildinfo
-└── tsconfig.json
+├── tsconfig.json
+└── web
+    ├── index.html
+    ├── public
+    ├── src
+    │   ├── App.tsx
+    │   ├── components
+    │   │   └── ui
+    │   │       ├── button.tsx
+    │   │       └── card.tsx
+    │   ├── index.css
+    │   ├── lib
+    │   │   ├── api.ts
+    │   │   └── utils.ts
+    │   ├── main.tsx
+    │   └── pages
+    │       ├── GeneratePage.tsx
+    │       ├── HomePage.tsx
+    │       ├── ProjectDetailPage.tsx
+    │       ├── ProjectsPage.tsx
+    │       ├── ReportsPage.tsx
+    │       └── SettingsPage.tsx
+    └── vite.config.ts
 
-68 directories, 205 files
+36 directories, 68 files

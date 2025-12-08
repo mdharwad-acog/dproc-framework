@@ -1,0 +1,51 @@
+🧪 Testing new features...
+
+1️⃣ Testing basic load (existing):
+   ✅ Records: 5
+   ✅ Has metadata: true
+   ✅ Has stats: true
+
+2️⃣ Testing load with validation (NEW):
+   ✅ Schema ID: sample-sales
+   ✅ Schema description: 4 fields
+   ✅ Validation results: { total_records: 5, valid_records: 5, invalid_records: 0 }
+
+3️⃣ Testing load with normalization (NEW):
+   ✅ Normalized: true
+   ✅ Timestamp: 2025-12-07T17:31:45.787Z
+
+4️⃣ Testing load with full processing (NEW):
+   ✅ Processed: true
+   ✅ Has enhanced stats: true
+   ✅ Has ranges: true
+   ✅ Column stats: 4 columns
+
+🎉 All new features are working!
+
+📊 Enhanced Stats Sample:
+{
+  "date": {
+    "null_count": 0,
+    "null_percentage": "0.00%",
+    "unique_count": 5,
+    "fill_rate": "100.00%",
+    "type": "date"
+  },
+  "product": {
+    "null_count": 0,
+    "null_percentage": "0.00%",
+    "unique_count": 3,
+    "fill_rate": "100.00%",
+    "type": "string"
+  },
+  "revenue": {
+    "null_count": 0,
+    "null_percentage": "0.00%",
+    "unique_count": 5,
+    "fill_rate": "100.00%",
+    "type": "numeric"
+  },
+  "region": {
+    "null_count": 0,
+    "null_percentage": "0.00%",
+...

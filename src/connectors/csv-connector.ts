@@ -1,23 +1,42 @@
-import { readFileSync } from "fs";
-import { parse } from "csv-parse/sync";
-import createDebug from "debug";
+import { createReadStream } from "fs";
+import { parse } from "csv-parse";
+import { AutoNormalizer } from "../normalization/auto-normalizer.js";
 
-const debug = createDebug("framework:csv-connector");
+export interface CsvLoadOptions {
+  normalize?: boolean;
+  delimiter?: string;
+  skipEmptyLines?: boolean;
+}
 
-export class CSVConnector {
-  static load(filePath: string): any[] {
-    debug("Loading CSV from: %s", filePath);
+export class CsvConnector {
+  private normalizer = new AutoNormalizer();
 
-    const content = readFileSync(filePath, "utf-8");
+  async load(filePath: string, options: CsvLoadOptions = {}): Promise<any[]> {
+    const records: any[] = [];
 
-    const records = parse(content, {
-      columns: true,
-      skip_empty_lines: true,
-      cast: true,
-      cast_date: false, // We'll handle dates manually
+    return new Promise((resolve, reject) => {
+      createReadStream(filePath)
+        .pipe(
+          parse({
+            columns: true,
+            skip_empty_lines: options.skipEmptyLines !== false,
+            delimiter: options.delimiter || ",",
+            trim: true,
+            cast: true,
+          })
+        )
+        .on("data", (row) => {
+          records.push(row);
+        })
+        .on("end", () => {
+          // Optional auto-normalization
+          const finalRecords = options.normalize
+            ? this.normalizer.normalizeRecords(records)
+            : records;
+
+          resolve(finalRecords);
+        })
+        .on("error", reject);
     });
-
-    debug("Loaded %d records", records.length);
-    return records;
   }
 }

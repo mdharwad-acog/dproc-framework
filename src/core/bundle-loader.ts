@@ -1,17 +1,32 @@
 import { Bundle, EnrichedBundle, CustomField, ComputedField } from "./types.js";
 import { UniversalConnector } from "../connectors/universal-connector.js";
 import { FormulaEngine } from "./formula-engine.js";
+import { StatsCalculator } from "./stats-calculator.js";
+import { SchemaInferrer } from "../validation/schema-inferrer.js";
+import { SchemaRegistry } from "../validation/schema-registry.js";
+import { AutoNormalizer } from "../normalization/auto-normalizer.js";
 import createDebug from "debug";
 
 const debug = createDebug("framework:bundle");
 
 export class BundleLoader {
   private formulaEngine: FormulaEngine;
+  private statsCalculator: StatsCalculator;
+  private schemaInferrer: SchemaInferrer;
+  private schemaRegistry: SchemaRegistry;
+  private autoNormalizer: AutoNormalizer;
 
   constructor() {
     this.formulaEngine = new FormulaEngine();
+    this.statsCalculator = new StatsCalculator();
+    this.schemaInferrer = new SchemaInferrer();
+    this.schemaRegistry = new SchemaRegistry();
+    this.autoNormalizer = new AutoNormalizer();
   }
 
+  /**
+   * Load dataset from file path (EXISTING - unchanged)
+   */
   async loadDataset(filePath: string): Promise<Bundle> {
     debug("Loading dataset from: %s", filePath);
 
@@ -37,6 +52,187 @@ export class BundleLoader {
     return bundle;
   }
 
+  /**
+   * Load dataset with validation (NEW)
+   * Auto-infers schema and validates records
+   */
+  async loadDatasetWithValidation(filePath: string): Promise<Bundle> {
+    debug("Loading dataset with validation from: %s", filePath);
+
+    // Load raw data first
+    const records = UniversalConnector.load(filePath);
+
+    // Auto-infer schema
+    const schema = this.schemaInferrer.inferSchema(records);
+    const schemaDescription = this.schemaInferrer.describeSchema(schema);
+
+    // Register schema for future use
+    const schemaId = this.generateSchemaId(filePath);
+    this.schemaRegistry.register(schemaId, schema);
+
+    // Validate records
+    const validationResults = records.map((record, idx) => {
+      try {
+        return {
+          record: schema.parse(record),
+          valid: true,
+          index: idx,
+        };
+      } catch (error: any) {
+        debug("Validation warning for record %d: %s", idx, error.message);
+        return {
+          record,
+          valid: false,
+          index: idx,
+          errors: error.errors || [error.message],
+        };
+      }
+    });
+
+    const validRecords = validationResults
+      .filter((r) => r.valid)
+      .map((r) => r.record);
+
+    const invalidCount = validationResults.filter((r) => !r.valid).length;
+
+    if (invalidCount > 0) {
+      console.warn(
+        `⚠️  ${invalidCount} records failed validation (kept original data)`
+      );
+    }
+
+    const stats = this.computeBasicStats(validRecords);
+    const samples = this.extractSamples(validRecords);
+
+    const bundle: Bundle = {
+      source: filePath,
+      records: validRecords,
+      stats,
+      metadata: {
+        ingested_at: new Date().toISOString(),
+        source_file: filePath,
+        record_count: validRecords.length,
+        schema_id: schemaId,
+        schema_description: schemaDescription,
+        validation: {
+          total_records: records.length,
+          valid_records: validRecords.length,
+          invalid_records: invalidCount,
+        },
+      },
+      samples: {
+        main: samples,
+      },
+    };
+
+    debug(
+      "Validated bundle created: %d valid records out of %d",
+      validRecords.length,
+      records.length
+    );
+    return bundle;
+  }
+
+  /**
+   * Load dataset with normalization (NEW)
+   * Auto-normalizes all fields based on patterns
+   */
+  async loadDatasetWithNormalization(filePath: string): Promise<Bundle> {
+    debug("Loading dataset with normalization from: %s", filePath);
+
+    // Load raw data
+    const records = UniversalConnector.load(filePath);
+
+    // Apply auto-normalization
+    const normalizedRecords = this.autoNormalizer.normalizeRecords(records);
+
+    const stats = this.computeBasicStats(normalizedRecords);
+    const samples = this.extractSamples(normalizedRecords);
+
+    const bundle: Bundle = {
+      source: filePath,
+      records: normalizedRecords,
+      stats,
+      metadata: {
+        ingested_at: new Date().toISOString(),
+        source_file: filePath,
+        record_count: normalizedRecords.length,
+        normalized: true,
+        normalization_timestamp: new Date().toISOString(),
+      },
+      samples: {
+        main: samples,
+      },
+    };
+
+    debug("Normalized bundle created: %d records", normalizedRecords.length);
+    return bundle;
+  }
+
+  /**
+   * Load dataset with full processing (NEW)
+   * Combines validation + normalization + enhanced stats
+   */
+  async loadDatasetWithProcessing(filePath: string): Promise<Bundle> {
+    debug("Loading dataset with full processing from: %s", filePath);
+
+    // Load raw data
+    const records = UniversalConnector.load(filePath);
+
+    // Normalize first
+    const normalizedRecords = this.autoNormalizer.normalizeRecords(records);
+
+    // Then validate
+    const schema = this.schemaInferrer.inferSchema(normalizedRecords);
+    const schemaId = this.generateSchemaId(filePath);
+    this.schemaRegistry.register(schemaId, schema);
+
+    const validatedRecords = normalizedRecords.map((record) => {
+      try {
+        return schema.parse(record);
+      } catch {
+        return record; // Keep original if validation fails
+      }
+    });
+
+    // Compute enhanced stats
+    const basicStats = this.computeBasicStats(validatedRecords);
+    const enhancedStats = {
+      ...basicStats,
+      ...this.statsCalculator.calculateStats(validatedRecords),
+    };
+
+    const samples = this.extractSamples(validatedRecords);
+
+    const bundle: Bundle = {
+      source: filePath,
+      records: validatedRecords,
+      stats: enhancedStats,
+      metadata: {
+        ingested_at: new Date().toISOString(),
+        source_file: filePath,
+        record_count: validatedRecords.length,
+        schema_id: schemaId,
+        normalized: true,
+        normalization_timestamp: new Date().toISOString(),
+        processed: true,
+        processing_timestamp: new Date().toISOString(),
+      },
+      samples: {
+        main: samples,
+      },
+    };
+
+    debug(
+      "Fully processed bundle created: %d records",
+      validatedRecords.length
+    );
+    return bundle;
+  }
+
+  /**
+   * Enrich bundle (EXISTING - enhanced with better stats)
+   */
   enrichBundle(
     bundle: Bundle,
     customFields?: CustomField[],
@@ -72,9 +268,22 @@ export class BundleLoader {
       debug("Added %d computed fields", computedFields.length);
     }
 
+    // Enhance stats with comprehensive calculations (NEW)
+    if (bundle.records.length > 0) {
+      const enhancedStats = {
+        ...enriched.stats,
+        ...this.statsCalculator.calculateStats(bundle.records),
+      };
+      enriched.stats = enhancedStats;
+      debug("Enhanced stats calculated");
+    }
+
     return enriched;
   }
 
+  /**
+   * Compute basic stats (EXISTING - unchanged)
+   */
   private computeBasicStats(records: any[]): Record<string, any> {
     if (records.length === 0) return {};
 
@@ -114,7 +323,21 @@ export class BundleLoader {
     return stats;
   }
 
+  /**
+   * Extract samples (EXISTING - unchanged)
+   */
   private extractSamples(records: any[]): any[] {
     return records.slice(0, 5);
+  }
+
+  /**
+   * Generate unique schema ID from file path (NEW - helper)
+   */
+  private generateSchemaId(filePath: string): string {
+    return filePath
+      .replace(/^.*[\\/]/, "") // Get filename
+      .replace(/\.[^.]+$/, "") // Remove extension
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-");
   }
 }

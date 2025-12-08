@@ -4,7 +4,7 @@ import { exec } from "child_process";
 import { networkInterfaces } from "os";
 import { createServer } from "../../server/index.js";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { dirname, resolve } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,8 +17,11 @@ export const serveCommand = new Command("serve")
     console.log(chalk.blue("\n🚀 Starting LLM Framework Studio...\n"));
 
     try {
-      const projectDir = process.env.PROJECT_DIR || `../${dirname}`;
-      const app = createServer(projectDir);
+      // Get project directory - current working directory
+      const projectDir = process.cwd();
+      const parentDir = dirname(projectDir);
+
+      const app = createServer(parentDir); // Pass parent dir to find all projects
 
       const server = app.listen(options.port, "0.0.0.0", () => {
         console.log(chalk.green("✅ LLM Framework Studio is running!\n"));
@@ -33,7 +36,7 @@ export const serveCommand = new Command("serve")
           });
         }
 
-        console.log(chalk.blue(`   Projects: ${projectDir}`));
+        console.log(chalk.blue(`   Projects: ${parentDir}`));
         console.log(chalk.gray("\n   Press Ctrl+C to stop\n"));
 
         if (options.open) {

@@ -1,0 +1,10 @@
+{
+  "id": "sample-sales",
+  "createdAt": "2025-12-07T17:31:45.792Z",
+  "shape": {
+    "date": "unknown",
+    "product": "unknown",
+    "revenue": "unknown",
+    "region": "unknown"
+  }
+}

@@ -1,11 +1,25 @@
 import { z } from "zod";
-
 // ==================== BUNDLE TYPES ====================
 
+// UPDATED: More flexible BundleMetadata schema
 export const BundleMetadataSchema = z.object({
   ingested_at: z.string(),
   source_file: z.string(),
   record_count: z.number(),
+  // NEW: Optional fields for validation/normalization
+  schema_id: z.string().optional(),
+  schema_description: z.record(z.string(), z.string()).optional(),
+  validation: z
+    .object({
+      total_records: z.number(),
+      valid_records: z.number(),
+      invalid_records: z.number(),
+    })
+    .optional(),
+  normalized: z.boolean().optional(),
+  normalization_timestamp: z.string().optional(),
+  processed: z.boolean().optional(),
+  processing_timestamp: z.string().optional(),
 });
 
 export const BundleSchema = z.object({
@@ -123,3 +137,11 @@ export const FrameworkDefaultsSchema = z.object({
 });
 
 export type FrameworkDefaults = z.infer<typeof FrameworkDefaultsSchema>;
+
+// ==================== VALIDATION TYPES (HELPERS) ====================
+
+export interface ValidationResult {
+  total_records: number;
+  valid_records: number;
+  invalid_records: number;
+}

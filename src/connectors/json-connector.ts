@@ -1,21 +1,36 @@
 import { readFileSync } from "fs";
-import createDebug from "debug";
+import { AutoNormalizer } from "../normalization/auto-normalizer.js";
 
-const debug = createDebug("framework:json-connector");
+export interface JsonLoadOptions {
+  normalize?: boolean;
+  arrayPath?: string; // JSONPath to array (e.g., "data.items")
+}
 
-export class JSONConnector {
-  static load(filePath: string): any[] {
-    debug("Loading JSON from: %s", filePath);
+export class JsonConnector {
+  private normalizer = new AutoNormalizer();
 
-    const content = readFileSync(filePath, "utf-8");
-    const data = JSON.parse(content);
+  load(filePath: string, options: JsonLoadOptions = {}): any[] {
+    const rawData = readFileSync(filePath, "utf-8");
+    let records = JSON.parse(rawData);
 
-    // Handle both array and object with array property
-    const records = Array.isArray(data)
-      ? data
-      : data.records || data.data || [];
+    // Handle nested arrays
+    if (options.arrayPath) {
+      const parts = options.arrayPath.split(".");
+      for (const part of parts) {
+        records = records[part];
+      }
+    }
 
-    debug("Loaded %d records", records.length);
-    return records;
+    // Ensure records is an array
+    if (!Array.isArray(records)) {
+      records = [records];
+    }
+
+    // Optional auto-normalization
+    const finalRecords = options.normalize
+      ? this.normalizer.normalizeRecords(records)
+      : records;
+
+    return finalRecords;
   }
 }

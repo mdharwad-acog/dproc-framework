@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import nunjucks from "nunjucks";
 import createDebug from "debug";
@@ -42,5 +42,17 @@ export class PromptRenderer {
 
   renderString(template: string, context: any): string {
     return this.env.renderString(template, context);
+  }
+
+  // Add these methods to your existing PromptRenderer class
+
+  /**
+   * Load prompt file (helper for report engine)
+   */
+  async loadPromptFile(filePath: string): Promise<string> {
+    if (!existsSync(filePath)) {
+      throw new Error(`Prompt file not found: ${filePath}`);
+    }
+    return readFileSync(filePath, "utf-8");
   }
 }

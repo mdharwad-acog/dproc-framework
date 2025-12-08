@@ -24,8 +24,8 @@ export type {
 
 // Connector exports
 export { UniversalConnector } from "../connectors/universal-connector.js";
-export { CSVConnector } from "../connectors/csv-connector.js";
-export { JSONConnector } from "../connectors/json-connector.js";
+export { CsvConnector } from "../connectors/csv-connector.js";
+export { JsonConnector } from "../connectors/json-connector.js";
 
 // Renderer exports
 export { HtmlRenderer } from "../renderers/html-renderer.js";
