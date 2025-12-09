@@ -8,31 +8,6 @@ export class StructuredParser {
   /**
    * Extract JSON from markdown code blocks
    */
-  static extractJSON(text: string): any {
-    // Try to find JSON in code blocks first
-    const jsonBlockMatch = text.match(/``````/);
-
-    if (jsonBlockMatch) {
-      try {
-        return JSON.parse(jsonBlockMatch[1]);
-      } catch (error) {
-        throw new Error("Invalid JSON in code block");
-      }
-    }
-
-    // Try to find raw JSON
-    const jsonMatch = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-
-    if (jsonMatch) {
-      try {
-        return JSON.parse(jsonMatch[0]);
-      } catch (error) {
-        throw new Error("Invalid JSON in response");
-      }
-    }
-
-    throw new Error("No JSON found in response");
-  }
 
   /**
    * Parse JSON with schema validation
@@ -95,26 +70,6 @@ export class StructuredParser {
         return row;
       })
       .filter((row) => Object.values(row).some((v) => v.length > 0));
-  }
-
-  /**
-   * Extract key-value pairs
-   */
-  static extractKeyValue(text: string): Record<string, string> {
-    const pairs: Record<string, string> = {};
-    const lines = text.split("\n");
-
-    for (const line of lines) {
-      // Match patterns like "Key: Value" or "**Key:** Value"
-      const match = line.match(/^\*?\*?([^:*]+)\*?\*?:\s*(.+)$/);
-      if (match) {
-        const key = match[1].trim();
-        const value = match[2].trim();
-        pairs[key] = value;
-      }
-    }
-
-    return pairs;
   }
 
   /**
@@ -194,5 +149,87 @@ export class StructuredParser {
     }
 
     return items;
+  }
+
+  // Update the extractJSON method:
+  // In src/prompts/structured-parser.ts, update extractJSON:
+
+  /**
+   * Extract JSON from text (handles code blocks and inline JSON)
+   */
+  static extractJSON(text: string): any {
+    // --- Phase 1: Try to extract from Markdown Code Blocks ---
+
+    // Use a single, comprehensive regex to capture content inside fences (```)
+    // It looks for any content ([\s\S]*?) between three backticks, optionally preceded
+    // by a language tag (like 'json'). It captures the content into group 1.
+    const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/;
+
+    const match = text.match(codeBlockRegex);
+
+    if (match && match[1]) {
+      const jsonStr = match[1].trim();
+
+      // Check if the extracted string looks like JSON (starts with { or [)
+      if (jsonStr.startsWith("{") || jsonStr.startsWith("[")) {
+        try {
+          return JSON.parse(jsonStr);
+        } catch (error: any) {
+          // If parsing fails from the code block, fall through to Phase 2
+          console.warn("Code block content found but failed to parse as JSON.");
+        }
+      }
+    }
+
+    // --- Phase 2: Fallback to find standalone JSON object or array ---
+
+    // Use a global regex to find ALL occurrences of valid-looking top-level JSON structures.
+    // It searches for either an object ({...}) OR an array ([...]).
+    // Note: This pattern is non-greedy and includes newlines, making it much safer than the original.
+    const jsonMatches = text.match(/(\{[\s\S]*?\}|\[[\s\S]*?\])/g);
+
+    if (jsonMatches) {
+      for (const jsonStr of jsonMatches) {
+        try {
+          const parsed = JSON.parse(jsonStr.trim());
+
+          // Ensure the parsed result is an object or array (and not null)
+          if (typeof parsed === "object" && parsed !== null) {
+            return parsed;
+          }
+        } catch (error: any) {
+          // Parsing failed for this match, continue to the next one
+          continue;
+        }
+      }
+    }
+
+    // If both phases failed
+    throw new Error("No valid JSON found in text");
+  }
+
+  // Update extractKeyValue method:
+  static extractKeyValue(text: string): Record<string, string> {
+    const result: Record<string, string> = {};
+
+    // Match patterns like "**Key:** Value" or "Key: Value"
+    const patterns = [
+      /\*\*([^*:]+):\*\*\s*(.+)/g, // **Key:** Value
+      /\*\*([^*:]+):\s*\*\*(.+)/g, // **Key: **Value
+      /([A-Za-z0-9_\s]+):\s*(.+)/g, // Key: Value
+    ];
+
+    for (const pattern of patterns) {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const key = match[1].trim().replace(/\s+/g, "_");
+        const value = match[2].trim();
+        if (key && value && !result[key]) {
+          result[key] = value;
+        }
+      }
+    }
+
+    return result;
   }
 }

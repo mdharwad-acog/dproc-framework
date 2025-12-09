@@ -2,13 +2,10 @@ import { z } from "zod";
 
 /**
  * Automatically infer Zod schemas from sample data
- * Implements Article 1: Validation Standards
  */
 export class SchemaInferrer {
   /**
    * Infer schema from records
-   * @param records - Array of data records
-   * @param sampleSize - Number of records to analyze
    */
   inferSchema(records: any[], sampleSize: number = 100): z.ZodObject<any> {
     if (records.length === 0) {
@@ -46,6 +43,20 @@ export class SchemaInferrer {
       return z.string().optional();
     }
 
+    // Check if all values are arrays
+    const arrayValues = values.filter((v) => Array.isArray(v));
+    if (arrayValues.length === values.length) {
+      return z.array(z.any()).optional();
+    }
+
+    // Check if all values are objects
+    const objectValues = values.filter(
+      (v) => typeof v === "object" && !Array.isArray(v)
+    );
+    if (objectValues.length === values.length) {
+      return z.record(z.any(), z.any()).optional();
+    }
+
     // Check if all values are numbers
     const numericValues = values.filter((v) => !isNaN(Number(v)));
     if (numericValues.length === values.length) {
@@ -55,34 +66,91 @@ export class SchemaInferrer {
     }
 
     // Check if all values are booleans
-    const booleanValues = values.filter(
-      (v) =>
-        v === true ||
-        v === false ||
-        v === "1" ||
-        v === "0" ||
-        v === "true" ||
-        v === "false" ||
-        v === "yes" ||
-        v === "no"
-    );
+    const booleanValues = values.filter((v) => this.isBooleanLike(v));
     if (booleanValues.length === values.length) {
       return z
         .union([
           z.boolean(),
-          z.string().transform((s) => s === "1" || s === "true" || s === "yes"),
+          z
+            .string()
+            .transform(
+              (s) => s === "1" || s === "true" || s === "yes" || s === "True"
+            ),
         ])
         .optional();
+    }
+
+    // Check if values are emails
+    const emailValues = values.filter((v) => this.isEmailLike(v));
+    if (emailValues.length > values.length * 0.9) {
+      return z.string().email().optional();
+    }
+
+    // Check if values are URLs
+    const urlValues = values.filter((v) => this.isUrlLike(v));
+    if (urlValues.length > values.length * 0.9) {
+      return z.string().url().optional();
     }
 
     // Check if values look like dates
     const dateValues = values.filter((v) => this.isDateLike(v));
     if (dateValues.length > values.length * 0.8) {
-      return z.string().optional();
+      return z.string().optional(); // Could add .datetime() validation
+    }
+
+    // Check if values might be enum (limited unique values)
+    const uniqueValues = new Set(values.map(String));
+    if (uniqueValues.size <= 10 && uniqueValues.size < values.length * 0.5) {
+      // Might be an enum
+      return z
+        .enum(Array.from(uniqueValues) as [string, ...string[]])
+        .optional();
     }
 
     // Default to string
     return z.string().optional();
+  }
+
+  /**
+   * Check if value looks like a boolean
+   */
+  private isBooleanLike(value: any): boolean {
+    return (
+      value === true ||
+      value === false ||
+      value === "1" ||
+      value === "0" ||
+      value === "true" ||
+      value === "false" ||
+      value === "True" ||
+      value === "False" ||
+      value === "yes" ||
+      value === "no" ||
+      value === "Yes" ||
+      value === "No"
+    );
+  }
+
+  /**
+   * Check if value looks like an email
+   */
+  private isEmailLike(value: any): boolean {
+    if (typeof value !== "string") return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value);
+  }
+
+  /**
+   * Check if value looks like a URL
+   */
+  private isUrlLike(value: any): boolean {
+    if (typeof value !== "string") return false;
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return value.match(/^https?:\/\//i) !== null;
+    }
   }
 
   /**
@@ -134,10 +202,40 @@ export class SchemaInferrer {
       return "number";
     } else if (typeName === "ZodBoolean") {
       return "boolean";
+    } else if (typeName === "ZodArray") {
+      return "array";
+    } else if (typeName === "ZodRecord") {
+      return "object";
+    } else if (typeName === "ZodEnum") {
+      return "enum";
     } else if (typeName === "ZodOptional") {
       return this.describeType(zodType._def.innerType) + " (optional)";
     }
 
     return "unknown";
+  }
+
+  /**
+   * Generate statistics about the inferred schema
+   */
+  getSchemaStats(schema: z.ZodObject<any>): {
+    fieldCount: number;
+    types: Record<string, number>;
+    optionalFields: number;
+  } {
+    const fieldCount = Object.keys(schema.shape).length;
+    const types: Record<string, number> = {};
+    let optionalFields = 0;
+
+    Object.values(schema.shape).forEach((zodType: any) => {
+      const typeName = zodType._def?.typeName || "unknown";
+      types[typeName] = (types[typeName] || 0) + 1;
+
+      if (typeName === "ZodOptional") {
+        optionalFields++;
+      }
+    });
+
+    return { fieldCount, types, optionalFields };
   }
 }

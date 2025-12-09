@@ -16,7 +16,8 @@ export class ProjectService {
   private static getProjectsDir(): string {
     // Use environment variable or default to ~/.llm-framework/projects
     return (
-      process.env.PROJECT_DIR || join(homedir(), ".llm-framework", "projects")
+      process.env.PROJECT_DIR ||
+      join(homedir(), ".aganitha", ".llm-framework", "projects")
     );
   }
 
@@ -33,7 +34,7 @@ export class ProjectService {
 
     for (const entry of entries) {
       const projectPath = join(projectsDir, entry);
-      const configPath = join(projectPath, "llm-framework.config.json");
+      const configPath = join(projectPath, "dproc.config.json");
 
       if (existsSync(configPath)) {
         try {
@@ -61,7 +62,7 @@ export class ProjectService {
 
   static async getProject(id: string): Promise<ProjectInfo | null> {
     const projectPath = join(this.getProjectsDir(), id);
-    const configPath = join(projectPath, "llm-framework.config.json");
+    const configPath = join(projectPath, "dproc.config.json");
 
     if (!existsSync(configPath)) {
       return null;

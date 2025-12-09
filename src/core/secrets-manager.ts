@@ -26,6 +26,7 @@ interface Secrets {
 export class SecretsManager {
   private static secretsPath = join(
     homedir(),
+    ".aganitha",
     ".llm-framework",
     "secrets.json"
   );
@@ -54,7 +55,7 @@ export class SecretsManager {
 
     if (!key) {
       throw new Error(
-        `No API key configured for ${provider}. Run: llm-framework setup`
+        `No API key configured for ${provider}. Run: dproc setup`
       );
     }
 
@@ -89,7 +90,7 @@ export class SecretsManager {
 
     if (!key) {
       throw new Error(
-        `No API key configured for ${provider}. Run: llm-framework setup`
+        `No API key configured for ${provider}. Run: dproc setup`
       );
     }
 
@@ -117,14 +118,14 @@ export class SecretsManager {
 
   private static load(): Secrets {
     if (!existsSync(this.secretsPath)) {
-      throw new Error("No API keys configured. Run: llm-framework setup");
+      throw new Error("No API keys configured. Run: dproc setup");
     }
 
     return JSON.parse(readFileSync(this.secretsPath, "utf-8"));
   }
 
   private static save(secrets: Secrets): void {
-    const dir = join(homedir(), ".llm-framework");
+    const dir = join(homedir(), ".aganitha", ".llm-framework");
 
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });

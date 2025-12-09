@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import { join, dirname } from "path";
 import { existsSync } from "fs";
@@ -15,7 +15,7 @@ import { homedir } from "os";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export function createServer(projectDir: string) {
+export function createServer(projectDir: string): Express {
   const app = express();
   console.log(projectDir);
   app.use(cors());
@@ -218,7 +218,7 @@ export function createServer(projectDir: string) {
     try {
       const { keys, models, activeProvider } = req.body;
 
-      const secretsDir = join(homedir(), ".llm-framework");
+      const secretsDir = join(homedir(), ".aganitha", ".llm-framework");
       if (!existsSync(secretsDir)) {
         mkdirSync(secretsDir, { recursive: true });
       }

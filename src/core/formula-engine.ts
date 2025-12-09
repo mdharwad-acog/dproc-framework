@@ -8,7 +8,6 @@ export class FormulaEngine {
 
     // Parse formula: FUNCTION_NAME(column_name, ...)
     const match = formula.match(/^([A-Z_]+)\(([^)]+)\)$/);
-
     if (!match) {
       throw new Error(`Invalid formula syntax: ${formula}`);
     }
@@ -19,20 +18,43 @@ export class FormulaEngine {
     switch (funcName) {
       case "SUM":
         return this.sum(data, args[0]);
+
       case "AVG":
         return this.avg(data, args[0]);
+
       case "COUNT":
         return this.count(data);
+
       case "MIN":
         return this.min(data, args[0]);
+
       case "MAX":
         return this.max(data, args[0]);
+
       case "TOP":
         return this.top(data, args[0], args[1], parseInt(args[2] || "1"));
+
+      case "MEDIAN":
+        return this.median(data, args[0]);
+
+      case "MODE":
+        return this.mode(data, args[0]);
+
+      case "STDEV":
+        return this.stdev(data, args[0]);
+
+      case "PERCENTILE":
+        return this.percentile(data, args[0], parseFloat(args[1]));
+
+      case "DISTINCT":
+        return this.distinct(data, args[0]);
+
       case "PERCENT_CHANGE":
         return this.percentChange(data, args[0], args[1]);
+
       case "GROUP_BY":
         return this.groupBy(data, args[0], args[1]);
+
       default:
         throw new Error(`Unknown formula function: ${funcName}`);
     }
@@ -44,7 +66,7 @@ export class FormulaEngine {
 
   private avg(data: any[], column: string): number {
     const sum = this.sum(data, column);
-    return sum / data.length;
+    return data.length > 0 ? sum / data.length : 0;
   }
 
   private count(data: any[]): number {
@@ -55,14 +77,14 @@ export class FormulaEngine {
     const values = data
       .map((row) => parseFloat(row[column]))
       .filter((v) => !isNaN(v));
-    return Math.min(...values);
+    return values.length > 0 ? Math.min(...values) : 0;
   }
 
   private max(data: any[], column: string): number {
     const values = data
       .map((row) => parseFloat(row[column]))
       .filter((v) => !isNaN(v));
-    return Math.max(...values);
+    return values.length > 0 ? Math.max(...values) : 0;
   }
 
   private top(
@@ -76,6 +98,85 @@ export class FormulaEngine {
       ([, a], [, b]) => (b as number) - (a as number)
     );
     return sorted[0]?.[0] || "";
+  }
+
+  // NEW: Median calculation
+  private median(data: any[], column: string): number {
+    const values = data
+      .map((row) => parseFloat(row[column]))
+      .filter((v) => !isNaN(v))
+      .sort((a, b) => a - b);
+
+    if (values.length === 0) return 0;
+
+    const mid = Math.floor(values.length / 2);
+    return values.length % 2 === 0
+      ? (values[mid - 1] + values[mid]) / 2
+      : values[mid];
+  }
+
+  // NEW: Mode (most common value)
+  private mode(data: any[], column: string): any {
+    const counts = new Map();
+    let maxCount = 0;
+    let modeValue: any = null;
+
+    data.forEach((row) => {
+      const val = row[column];
+      if (val != null) {
+        const count = (counts.get(val) || 0) + 1;
+        counts.set(val, count);
+        if (count > maxCount) {
+          maxCount = count;
+          modeValue = val;
+        }
+      }
+    });
+
+    return modeValue;
+  }
+
+  // NEW: Standard deviation
+  private stdev(data: any[], column: string): number {
+    const values = data
+      .map((row) => parseFloat(row[column]))
+      .filter((v) => !isNaN(v));
+
+    if (values.length === 0) return 0;
+
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    const variance =
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.length;
+    return Math.sqrt(variance);
+  }
+
+  // NEW: Percentile calculation
+  private percentile(data: any[], column: string, p: number): number {
+    const values = data
+      .map((row) => parseFloat(row[column]))
+      .filter((v) => !isNaN(v))
+      .sort((a, b) => a - b);
+
+    if (values.length === 0) return 0;
+    if (p < 0 || p > 100)
+      throw new Error("Percentile must be between 0 and 100");
+
+    const index = (p / 100) * (values.length - 1);
+    const lower = Math.floor(index);
+    const upper = Math.ceil(index);
+    const weight = index - lower;
+
+    if (lower === upper) return values[lower];
+    return values[lower] * (1 - weight) + values[upper] * weight;
+  }
+
+  // NEW: Count distinct values
+  private distinct(data: any[], column: string): number {
+    const uniqueValues = new Set(
+      data.map((row) => row[column]).filter((v) => v != null)
+    );
+    return uniqueValues.size;
   }
 
   private percentChange(
@@ -130,12 +231,15 @@ export class FormulaEngine {
         case "SUM":
           result[key] = this.sum(groupData, column);
           break;
+
         case "AVG":
           result[key] = this.avg(groupData, column);
           break;
+
         case "COUNT":
           result[key] = groupData.length;
           break;
+
         default:
           throw new Error(`Unknown aggregation: ${funcName}`);
       }

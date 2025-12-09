@@ -8,7 +8,7 @@ const debug = createDebug("framework:project-config");
 
 export class ProjectConfigLoader {
   static load(configPath?: string): ProjectConfig {
-    const path = configPath || join(process.cwd(), "llm-framework.config.json");
+    const path = configPath || join(process.cwd(), "dproc.config.json");
 
     if (!existsSync(path)) {
       throw new Error(

@@ -1,16 +1,10 @@
 .
 ├── bin
 │   └── dproc-framework.js
-├── components
-│   └── ui
-│       ├── button.tsx
-│       └── card.tsx
 ├── files.txt
-├── lib
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
-├── public
 ├── src
 │   ├── cli
 │   │   ├── commands
@@ -31,6 +25,7 @@
 │   ├── core
 │   │   ├── bundle-loader.ts
 │   │   ├── config-manager.ts
+│   │   ├── context-manager.ts
 │   │   ├── formula-engine.ts
 │   │   ├── index.ts
 │   │   ├── llm-client.ts
@@ -40,45 +35,76 @@
 │   │   ├── report-engine.ts
 │   │   ├── secrets-manager.ts
 │   │   ├── spec-loader.ts
+│   │   ├── stats-calculator.ts
 │   │   ├── types.ts
-│   │   └── validators.ts
+│   │   ├── validators.ts
+│   │   └── variable-validator.ts
+│   ├── mdx
+│   │   ├── component-registry.ts
+│   │   ├── components
+│   │   │   ├── Callout.tsx
+│   │   │   ├── Chart.tsx
+│   │   │   ├── DataTable.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── KPIGrid.tsx
+│   │   │   ├── KPI.tsx
+│   │   │   └── Metric.tsx
+│   │   ├── index.ts
+│   │   ├── mdx-renderer.ts
+│   │   └── styles
+│   │       └── components.css
+│   ├── normalization
+│   │   ├── auto-normalizer.ts
+│   │   ├── date-normalizer.ts
+│   │   ├── index.ts
+│   │   ├── numeric-normalizer.ts
+│   │   └── text-cleaner.ts
+│   ├── prompts
+│   │   ├── index.ts
+│   │   ├── prompt-composer.ts
+│   │   ├── prompt-library.ts
+│   │   ├── prompt-validator.ts
+│   │   ├── structured-parser.ts
+│   │   └── templates
+│   │       ├── common
+│   │       │   ├── analyze-trends.prompt.md
+│   │       │   ├── compare-items.prompt.md
+│   │       │   ├── extract-entities.prompt.md
+│   │       │   ├── recommendations.prompt.md
+│   │       │   └── summarize.prompt.md
+│   │       └── domain
+│   │           ├── biomedical
+│   │           │   ├── drug-discovery.prompt.md
+│   │           │   └── patent-analysis.prompt.md
+│   │           └── financial
+│   │               ├── market-analysis.prompt.md
+│   │               └── risk-assessment.prompt.md
 │   ├── renderers
 │   │   ├── export-manager.ts
 │   │   ├── html-renderer.ts
+│   │   ├── index.ts
 │   │   └── pdf-renderer.ts
 │   ├── server
 │   │   └── index.ts
 │   ├── services
 │   │   └── project-service.ts
-│   └── templates
-│       └── builtin
-│           ├── customer-insights
-│           ├── financial-summary
-│           └── sales-analysis
-│               ├── config.json
-│               ├── prompts
-│               │   ├── executive-summary.md
-│               │   ├── key-insights.md
-│               │   └── recommendations.md
-│               └── templates
-│                   └── sales-report.njk
-├── tests
-│   ├── fixtures
-│   │   ├── prompts
-│   │   │   └── summary.md
-│   │   ├── sample-sales.csv
-│   │   ├── sample-sales.json
-│   │   └── templates
-│   │       └── report.njk
-│   ├── integration
-│   ├── output
-│   │   └── report.md
-│   └── unit
-│       ├── bundle-loader.test.js
-│       ├── connectors.test.js
-│       └── report-engine.test.js
+│   ├── templates
+│   │   └── builtin
+│   │       ├── customer-insights
+│   │       ├── financial-summary
+│   │       └── sales-analysis
+│   │           ├── config.json
+│   │           ├── prompts
+│   │           │   ├── executive-summary.md
+│   │           │   ├── key-insights.md
+│   │           │   └── recommendations.md
+│   │           └── templates
+│   │               └── sales-report.njk
+│   └── validation
+│       ├── index.ts
+│       ├── schema-inferrer.ts
+│       └── schema-registry.ts
 ├── tsconfig.cli.json
-├── tsconfig.cli.tsbuildinfo
 ├── tsconfig.json
 └── web
     ├── index.html
@@ -86,6 +112,13 @@
     ├── src
     │   ├── App.tsx
     │   ├── components
+    │   │   ├── mdx
+    │   │   │   ├── Callout.tsx
+    │   │   │   ├── Chart.tsx
+    │   │   │   ├── DataTable.tsx
+    │   │   │   ├── index.ts
+    │   │   │   ├── KPIGrid.tsx
+    │   │   │   └── KPI.tsx
     │   │   └── ui
     │   │       ├── button.tsx
     │   │       └── card.tsx
@@ -103,4 +136,4 @@
     │       └── SettingsPage.tsx
     └── vite.config.ts
 
-36 directories, 68 files
+37 directories, 100 files

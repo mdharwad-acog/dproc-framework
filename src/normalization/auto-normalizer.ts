@@ -1,10 +1,13 @@
 import { TextCleaner } from "./text-cleaner.js";
 import { DateNormalizer } from "./date-normalizer.js";
 import { NumericNormalizer } from "./numeric-normalizer.js";
+import createDebug from "debug";
+
+const debug = createDebug("framework:normalize");
 
 /**
  * Automatically apply appropriate normalization based on field patterns
- * Implements Article 1: Domain-specific normalization
+ * Implements domain-specific normalization
  */
 export class AutoNormalizer {
   /**
@@ -13,6 +16,7 @@ export class AutoNormalizer {
   normalizeRecord(record: any): any {
     if (!record || typeof record !== "object") return record;
 
+    debug("Normalizing record with %d fields", Object.keys(record).length);
     const normalized: any = {};
 
     Object.entries(record).forEach(([key, value]) => {
@@ -26,6 +30,7 @@ export class AutoNormalizer {
    * Normalize multiple records
    */
   normalizeRecords(records: any[]): any[] {
+    debug("Normalizing %d records", records.length);
     return records.map((record) => this.normalizeRecord(record));
   }
 
@@ -74,7 +79,9 @@ export class AutoNormalizer {
       key.includes("updated") ||
       key.includes("published") ||
       key.includes("filing") ||
-      key.includes("grant")
+      key.includes("grant") ||
+      key.endsWith("_at") ||
+      key.endsWith("_on")
     );
   }
 
@@ -90,7 +97,10 @@ export class AutoNormalizer {
       key.includes("staff") ||
       key.includes("sum") ||
       key.includes("avg") ||
-      key.includes("number")
+      key.includes("number") ||
+      key.includes("quantity") ||
+      key.includes("score") ||
+      key.includes("value")
     );
   }
 
@@ -99,7 +109,8 @@ export class AutoNormalizer {
       key.includes("percent") ||
       key.includes("rate") ||
       key.includes("ratio") ||
-      key.endsWith("_pct")
+      key.endsWith("_pct") ||
+      key.endsWith("_rate")
     );
   }
 
@@ -114,6 +125,7 @@ export class AutoNormalizer {
       key.includes("keywords") ||
       key.includes("authors") ||
       key.includes("inventors") ||
+      key.includes("categories") ||
       (typeof value === "string" &&
         (value.includes(",") || value.includes(";") || value.includes("|")))
     );
@@ -127,6 +139,7 @@ export class AutoNormalizer {
         key.includes("abstract") ||
         key.includes("text") ||
         key.includes("name") ||
+        key.includes("summary") ||
         value.length > 50)
     );
   }

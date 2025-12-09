@@ -340,4 +340,75 @@ export class BundleLoader {
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "-");
   }
+
+  /**
+   * Load dataset with full processing and progress tracking (NEW)
+   * Useful for CLI with progress bars
+   */
+  async loadDatasetWithProgressTracking(
+    filePath: string,
+    onProgress?: (stage: string, progress: number) => void
+  ): Promise<Bundle> {
+    debug("Loading dataset with progress tracking from: %s", filePath);
+
+    try {
+      // Stage 1: Load data
+      onProgress?.("Loading data", 0);
+      const records = UniversalConnector.load(filePath);
+      onProgress?.("Data loaded", 20);
+
+      // Stage 2: Normalize
+      onProgress?.("Normalizing data", 25);
+      const normalizedRecords = this.autoNormalizer.normalizeRecords(records);
+      onProgress?.("Normalization complete", 45);
+
+      // Stage 3: Validate
+      onProgress?.("Validating schema", 50);
+      const schema = this.schemaInferrer.inferSchema(normalizedRecords);
+      const schemaId = this.generateSchemaId(filePath);
+      this.schemaRegistry.register(schemaId, schema);
+      onProgress?.("Validation complete", 70);
+
+      // Stage 4: Calculate stats
+      onProgress?.("Calculating statistics", 75);
+      const basicStats = this.computeBasicStats(normalizedRecords);
+      const enhancedStats = {
+        ...basicStats,
+        ...this.statsCalculator.calculateStats(normalizedRecords),
+      };
+      onProgress?.("Statistics calculated", 90);
+
+      // Stage 5: Extract samples
+      const samples = this.extractSamples(normalizedRecords);
+
+      // Build final bundle
+      const bundle: Bundle = {
+        source: filePath,
+        records: normalizedRecords,
+        stats: enhancedStats,
+        metadata: {
+          ingested_at: new Date().toISOString(),
+          source_file: filePath,
+          record_count: normalizedRecords.length,
+          schema_id: schemaId,
+          normalized: true,
+          processed: true,
+          processing_timestamp: new Date().toISOString(),
+        },
+        samples: {
+          main: samples,
+        },
+      };
+
+      onProgress?.("Complete", 100);
+      debug(
+        "Bundle with progress tracking created: %d records",
+        normalizedRecords.length
+      );
+      return bundle;
+    } catch (error: any) {
+      debug("Error during bundle loading: %s", error.message);
+      throw new Error(`Failed to load dataset with progress: ${error.message}`);
+    }
+  }
 }

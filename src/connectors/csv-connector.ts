@@ -1,4 +1,4 @@
-import { createReadStream } from "fs";
+import { createReadStream, existsSync } from "fs";
 import { parse } from "csv-parse";
 import { AutoNormalizer } from "../normalization/auto-normalizer.js";
 
@@ -12,6 +12,10 @@ export class CsvConnector {
   private normalizer = new AutoNormalizer();
 
   async load(filePath: string, options: CsvLoadOptions = {}): Promise<any[]> {
+    if (!existsSync(filePath)) {
+      throw new Error(`CSV file not found: ${filePath}`);
+    }
+
     const records: any[] = [];
 
     return new Promise((resolve, reject) => {
@@ -33,10 +37,11 @@ export class CsvConnector {
           const finalRecords = options.normalize
             ? this.normalizer.normalizeRecords(records)
             : records;
-
           resolve(finalRecords);
         })
-        .on("error", reject);
+        .on("error", (error) => {
+          reject(new Error(`CSV parsing failed: ${error.message}`));
+        });
     });
   }
 }

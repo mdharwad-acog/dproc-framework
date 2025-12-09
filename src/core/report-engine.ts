@@ -13,6 +13,7 @@ import { VariableValidator } from "./variable-validator.js";
 import { PromptLibrary } from "../prompts/prompt-library.js";
 import { PromptComposer } from "../prompts/prompt-composer.js";
 import { StructuredParser } from "../prompts/structured-parser.js";
+import { MDXRenderer } from "../mdx/mdx-renderer.js";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import nunjucks from "nunjucks";
@@ -117,13 +118,13 @@ export class ReportEngine {
       return JSON.stringify(obj, null, 2);
     });
 
-    // NEW: Format percentage
+    // Format percentage
     this.templateEnv.addFilter("percent", (num: any, decimals: number = 1) => {
       if (typeof num !== "number") return num;
       return (num * 100).toFixed(decimals) + "%";
     });
 
-    // NEW: List join
+    // List join
     this.templateEnv.addFilter(
       "join",
       (arr: any[], separator: string = ", ") => {
@@ -132,13 +133,13 @@ export class ReportEngine {
       }
     );
 
-    // NEW: Extract first N items
+    // Extract first N items
     this.templateEnv.addFilter("first", (arr: any[], n: number = 5) => {
       if (!Array.isArray(arr)) return arr;
       return arr.slice(0, n);
     });
 
-    // NEW: Sort array
+    // Sort array
     this.templateEnv.addFilter(
       "sort",
       (arr: any[], key?: string, reverse: boolean = false) => {
@@ -156,7 +157,7 @@ export class ReportEngine {
   }
 
   /**
-   * Generate report (ENHANCED with Phase 2 features)
+   * Generate report (ENHANCED with Phase 2 + Phase 3 MDX features)
    */
   async generate(
     config: ProjectConfig,
@@ -183,12 +184,12 @@ export class ReportEngine {
       stats: bundle.stats,
       metadata: bundle.metadata,
 
-      // NEW: Add enhanced stats if available
+      // Add enhanced stats if available
       column_stats: bundle.stats?.columns,
       distributions: bundle.stats?.distributions,
       ranges: bundle.stats?.ranges,
 
-      // NEW: Add convenience accessors
+      // Add convenience accessors
       record_count: bundle.metadata.record_count,
       schema_id: bundle.metadata.schema_id,
       normalized: bundle.metadata.normalized,
@@ -229,10 +230,30 @@ export class ReportEngine {
     }
 
     const templateContent = readFileSync(templatePath, "utf-8");
-    const reportMarkdown = this.templateEnv.renderString(
+    let reportMarkdown = this.templateEnv.renderString(
       templateContent,
       context
     );
+
+    // PHASE 3: Check if output contains MDX and render it
+    if (MDXRenderer.isMDX(reportMarkdown)) {
+      debug("Detected MDX content in output, rendering components");
+      try {
+        const mdxRenderer = new MDXRenderer();
+        const htmlContent = await mdxRenderer.render(reportMarkdown, {
+          data: context,
+        });
+
+        // Wrap HTML in a special marker so ExportManager knows it's MDX
+        reportMarkdown = `<!-- MDX_RENDERED -->\n${htmlContent}`;
+        debug("MDX rendered successfully to HTML");
+      } catch (error: any) {
+        console.warn(
+          `⚠️  MDX rendering failed, falling back to plain markdown: ${error.message}`
+        );
+        debug("MDX error details: %O", error);
+      }
+    }
 
     // Ensure output directory exists
     const outputDir = config.output.destination;
@@ -264,7 +285,7 @@ export class ReportEngine {
     // Gather inputs
     const inputs = this.resolveInputs(variable.inputs, bundle, context);
 
-    // NEW: Validate variables if enabled
+    // Validate variables if enabled
     if (options.validateVariables) {
       const validation = this.validateInputs(variable, inputs);
       if (!validation.valid) {
@@ -275,7 +296,7 @@ export class ReportEngine {
       }
     }
 
-    // NEW: Load prompt (from library or file)
+    // Load prompt (from library or file)
     let promptTemplate: string;
 
     if (
@@ -304,7 +325,7 @@ export class ReportEngine {
     // Render prompt with inputs
     const prompt = this.promptRenderer.renderString(promptTemplate, inputs);
 
-    // NEW: Manage context window if enabled
+    // Manage context window if enabled
     let finalPrompt = prompt;
     if (options.manageContext) {
       const reserveTokens = 2000; // Reserve for output
@@ -343,7 +364,7 @@ export class ReportEngine {
     const response = await this.llmClient.generateText({ prompt: finalPrompt });
     debug("LLM response received: %d chars", response.length);
 
-    // NEW: Parse response with structured parser if enabled
+    // Parse response with structured parser if enabled
     if (options.parseStructured) {
       return this.parseResponseStructured(
         response,
@@ -357,7 +378,7 @@ export class ReportEngine {
   }
 
   /**
-   * Validate inputs before rendering (NEW)
+   * Validate inputs before rendering
    */
   private validateInputs(
     variable: ReportVariable,
@@ -396,7 +417,7 @@ export class ReportEngine {
   }
 
   /**
-   * Parse response using structured parser (NEW)
+   * Parse response using structured parser
    */
   private parseResponseStructured(
     response: string,
@@ -445,7 +466,7 @@ export class ReportEngine {
   }
 
   /**
-   * Resolve inputs from paths (EXISTING - kept for compatibility)
+   * Resolve inputs from paths
    */
   private resolveInputs(
     inputPaths: string[],
@@ -460,7 +481,7 @@ export class ReportEngine {
       resolved[key] = value;
     }
 
-    // NEW: Always include bundle and context
+    // Always include bundle and context
     resolved.bundle = bundle;
     resolved.context = context;
     resolved.stats = bundle.stats;
@@ -470,7 +491,7 @@ export class ReportEngine {
   }
 
   /**
-   * Resolve path from bundle/context (EXISTING - unchanged)
+   * Resolve path from bundle/context
    */
   private resolvePath(
     path: string,
@@ -492,7 +513,7 @@ export class ReportEngine {
   }
 
   /**
-   * Parse response (EXISTING - kept for fallback)
+   * Parse response (fallback)
    */
   private parseResponse(response: string, type: string): any {
     switch (type) {
@@ -526,7 +547,7 @@ export class ReportEngine {
   }
 
   /**
-   * Generate report using prompt library (NEW convenience method)
+   * Generate report using prompt library (convenience method)
    */
   async generateWithLibrary(
     bundle: EnrichedBundle,
@@ -578,7 +599,7 @@ export class ReportEngine {
   }
 
   /**
-   * Generate report with multi-step prompts (NEW)
+   * Generate report with multi-step prompts
    */
   async generateMultiStep(
     bundle: EnrichedBundle,

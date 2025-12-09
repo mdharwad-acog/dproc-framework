@@ -3,17 +3,12 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": false,
-    "resolveJsonModule": true
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "declaration": true,
+    "jsx": "react"
   },
-  "include": [
-    "src/cli/**/*",
-    "src/core/**/*",
-    "src/connectors/**/*",
-    "src/renderers/**/*",
-    "src/services/**/*",
-    "src/server/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "web"]
 }

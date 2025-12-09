@@ -2,6 +2,9 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import createDebug from "debug";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { setupCommand } from "./commands/setup.js";
 import { useCommand } from "./commands/use.js";
 import { configCommand } from "./commands/config.js";
@@ -12,12 +15,22 @@ import { serveCommand } from "./commands/serve.js";
 
 const debug = createDebug("framework:cli");
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Read version from package.json
+const packageJson = JSON.parse(
+  readFileSync(join(__dirname, "../../package.json"), "utf-8")
+);
+
 const program = new Command();
 
 program
-  .name("llm-framework")
-  .description("LLM-powered data report generation framework")
-  .version("0.1.0");
+  .name("dproc") // ← Match bin name
+  .description(
+    "Production-ready LLM-powered data processing and report generation framework"
+  )
+  .version(packageJson.version);
 
 program.option("-d, --debug", "Enable debug mode");
 

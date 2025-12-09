@@ -66,12 +66,12 @@ export const initCommand = new Command("init")
       // Create README
       const readme = [
         "cd " + name,
-        "llm-framework generate",
+        "dproc generate",
         "```",
         "",
         "## Files",
         "",
-        "- `llm-framework.config.json` - Project configuration",
+        "- `dproc.config.json` - Project configuration",
         "- `spec.yml` - Report structure definition",
         "- `data/` - Your datasets",
         "- `prompts/` - LLM prompt templates",
@@ -82,7 +82,7 @@ export const initCommand = new Command("init")
         "",
         "Configure API keys once (stored globally):",
         "```bash",
-        "llm-framework setup",
+        "dproc setup",
         "```",
       ].join("\n");
 
@@ -91,7 +91,7 @@ export const initCommand = new Command("init")
       console.log(chalk.green(`✅ Project created: ${projectDir}\n`));
       console.log(chalk.blue("➡️ Next steps:"));
       console.log(`  cd ${name}`);
-      console.log(`  llm-framework generate       # Generate report\n`);
+      console.log(`  dproc generate       # Generate report\n`);
     }
   );
 
@@ -120,7 +120,7 @@ function createGenericProject(projectDir: string, name: string) {
   };
 
   writeFileSync(
-    join(projectDir, "llm-framework.config.json"),
+    join(projectDir, "dproc.config.json"),
     JSON.stringify(config, null, 2)
   );
 
@@ -228,7 +228,7 @@ function createSalesProject(projectDir: string, name: string) {
   };
 
   writeFileSync(
-    join(projectDir, "llm-framework.config.json"),
+    join(projectDir, "dproc.config.json"),
     JSON.stringify(config, null, 2)
   );
 

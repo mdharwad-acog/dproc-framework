@@ -11,7 +11,6 @@ export const validateCommand = new Command("validate")
       console.log(chalk.blue(`\n🔍 Validating: ${file}\n`));
 
       const records = UniversalConnector.load(file);
-
       console.log(chalk.green("✓ File loaded successfully"));
       console.log(chalk.cyan(`  Records: ${records.length}`));
 
@@ -22,10 +21,11 @@ export const validateCommand = new Command("validate")
 
       const columns = Object.keys(records[0]);
       console.log(chalk.cyan(`  Columns: ${columns.length}`));
-      console.log(chalk.gray(`    ${columns.join(", ")}\n`));
+      console.log(chalk.gray(`  ${columns.join(", ")}\n`));
 
       const types = DataValidator.inferColumnTypes(records);
       console.log(chalk.blue("📊 Column Types:"));
+
       Object.entries(types).forEach(([col, type]) => {
         const icon = type === "number" ? "🔢" : type === "date" ? "📅" : "📝";
         console.log(`  ${icon} ${col.padEnd(20)} ${chalk.gray(type)}`);
