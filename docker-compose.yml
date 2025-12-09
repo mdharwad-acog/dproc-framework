@@ -1,0 +1,19 @@
+services:
+  dproc-framework:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dproc-framework:latest
+    container_name: dproc-framework
+    labels:
+      - "user=${USER}"
+      - "description=dproc Framework - AI Report Generator & Preview"
+      - "port=5555"
+    restart: unless-stopped
+    volumes:
+      - ~/dproc-workspace:/workspace
+    environment:
+      - NODE_ENV=production
+      - PROJECT_DIR=/workspace
+    ports:
+      - "5555:5555"

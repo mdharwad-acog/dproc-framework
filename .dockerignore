@@ -1,0 +1,14 @@
+node_modules
+dist
+web/dist
+*.tgz
+.git
+.env
+.DS_Store
+dproc-framework-v2
+dproc-test
+tmp
+tests
+*.log
+.vscode
+files.txt
