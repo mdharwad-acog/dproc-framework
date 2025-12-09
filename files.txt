@@ -1,10 +1,12 @@
 .
 ├── bin
 │   └── dproc-framework.js
+├── CHANGELOG.md
 ├── files.txt
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
+├── README.md
 ├── src
 │   ├── cli
 │   │   ├── commands
@@ -66,19 +68,6 @@
 │   │   ├── prompt-validator.ts
 │   │   ├── structured-parser.ts
 │   │   └── templates
-│   │       ├── common
-│   │       │   ├── analyze-trends.prompt.md
-│   │       │   ├── compare-items.prompt.md
-│   │       │   ├── extract-entities.prompt.md
-│   │       │   ├── recommendations.prompt.md
-│   │       │   └── summarize.prompt.md
-│   │       └── domain
-│   │           ├── biomedical
-│   │           │   ├── drug-discovery.prompt.md
-│   │           │   └── patent-analysis.prompt.md
-│   │           └── financial
-│   │               ├── market-analysis.prompt.md
-│   │               └── risk-assessment.prompt.md
 │   ├── renderers
 │   │   ├── export-manager.ts
 │   │   ├── html-renderer.ts
@@ -90,16 +79,6 @@
 │   │   └── project-service.ts
 │   ├── templates
 │   │   └── builtin
-│   │       ├── customer-insights
-│   │       ├── financial-summary
-│   │       └── sales-analysis
-│   │           ├── config.json
-│   │           ├── prompts
-│   │           │   ├── executive-summary.md
-│   │           │   ├── key-insights.md
-│   │           │   └── recommendations.md
-│   │           └── templates
-│   │               └── sales-report.njk
 │   └── validation
 │       ├── index.ts
 │       ├── schema-inferrer.ts
@@ -108,17 +87,9 @@
 ├── tsconfig.json
 └── web
     ├── index.html
-    ├── public
     ├── src
     │   ├── App.tsx
     │   ├── components
-    │   │   ├── mdx
-    │   │   │   ├── Callout.tsx
-    │   │   │   ├── Chart.tsx
-    │   │   │   ├── DataTable.tsx
-    │   │   │   ├── index.ts
-    │   │   │   ├── KPIGrid.tsx
-    │   │   │   └── KPI.tsx
     │   │   └── ui
     │   │       ├── button.tsx
     │   │       └── card.tsx
@@ -136,4 +107,4 @@
     │       └── SettingsPage.tsx
     └── vite.config.ts
 
-37 directories, 100 files
+26 directories, 82 files

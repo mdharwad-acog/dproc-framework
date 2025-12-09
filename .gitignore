@@ -16,3 +16,5 @@ output/
 .env.local
 .env.*.local
 dproc-test
+.npmignore
+files.txt

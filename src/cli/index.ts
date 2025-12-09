@@ -57,6 +57,7 @@ try {
   await program.parseAsync(process.argv);
 } catch (error: any) {
   if (
+    error.code === "commander.version" ||
     error.code === "commander.help" ||
     error.code === "commander.helpDisplayed"
   ) {

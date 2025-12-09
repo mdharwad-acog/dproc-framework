@@ -263,9 +263,6 @@ export const generateCommand = new Command("generate")
         });
       }
 
-      // Show timing
-      console.log(chalk.blue(`\n⏱️  Total time: ${elapsedTime}s\n`));
-
       progress.complete();
     } catch (error: any) {
       progress.fail("Generation failed");

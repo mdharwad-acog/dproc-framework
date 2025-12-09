@@ -40,3 +40,36 @@ web/node_modules/
 pnpm-lock.yaml
 yarn.lock
 package-lock.json
+# Source files
+src/
+tests/
+web/src/
+
+# Development
+*.log
+*.tgz
+node_modules/
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts (keep dist)
+coverage/
+.nyc_output/
+
+# Git
+.git/
+.gitignore
+
+# Documentation source
+docs/
+
+# Config
+tsconfig.*.json
+vite.config.ts
+tailwind.config.js
