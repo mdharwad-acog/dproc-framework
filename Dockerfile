@@ -25,4 +25,4 @@ EXPOSE 5555
 ENV NODE_ENV=production
 
 # Start server
-CMD ["node", "dist/cli/index.js", "serve", "--host", "0.0.0.0", "--port", "5555"]
+CMD ["node", "dist/cli/index.js", "serve", "-h", "0.0.0.0", "-p", "5555"]

@@ -7,39 +7,42 @@ import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 export const serveCommand = new Command("serve")
   .description("Start LLM Framework Studio (Web UI)")
   .option("-p, --port <port>", "Port number", "5555")
+  .option("-h, --host <host>", "Host to bind to", "localhost")
   .option("--no-open", "Don't open browser automatically")
   .action(async (options) => {
     console.log(chalk.blue("\n🚀 Starting LLM Framework Studio...\n"));
 
     try {
-      // Get project directory - current working directory
-      const projectDir = process.cwd();
-      const parentDir = dirname(projectDir);
+      // Get projects directory from env or default to parent of cwd
+      const projectsDir = process.env.PROJECT_DIR || dirname(process.cwd());
 
-      const app = createServer(parentDir); // Pass parent dir to find all projects
+      console.log(chalk.gray(`   Loading projects from: ${projectsDir}\n`));
 
-      const server = app.listen(options.port, "0.0.0.0", () => {
+      const app = createServer(projectsDir);
+
+      const server = app.listen(options.port, options.host, () => {
         console.log(chalk.green("✅ LLM Framework Studio is running!\n"));
 
-        const localUrl = `http://localhost:${options.port}`;
+        const localUrl = `http://${options.host}:${options.port}`;
         console.log(chalk.blue(`   Local:    ${localUrl}`));
 
-        const networkUrls = getNetworkUrls(options.port);
-        if (networkUrls.length > 0) {
-          networkUrls.forEach((url) => {
-            console.log(chalk.blue(`   Network:  ${url}`));
-          });
+        if (options.host === "0.0.0.0") {
+          const networkUrls = getNetworkUrls(options.port);
+          if (networkUrls.length > 0) {
+            networkUrls.forEach((url) => {
+              console.log(chalk.blue(`   Network:  ${url}`));
+            });
+          }
         }
 
-        console.log(chalk.blue(`   Projects: ${parentDir}`));
+        console.log(chalk.blue(`   Projects: ${projectsDir}`));
         console.log(chalk.gray("\n   Press Ctrl+C to stop\n"));
 
-        if (options.open) {
+        if (options.open && options.host === "localhost") {
           setTimeout(() => {
             openBrowser(localUrl);
           }, 1000);

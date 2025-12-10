@@ -104,7 +104,7 @@ function createGenericProject(projectDir: string, name: string) {
       custom: [
         {
           name: "report_date",
-          value: new Date().toISOString().split("T"),
+          value: new Date().toISOString().split("T")[0],
         },
       ],
       computed: [
