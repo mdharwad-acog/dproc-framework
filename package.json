@@ -1,6 +1,6 @@
 {
   "name": "@aganitha/dproc-framework",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Production-ready LLM-powered data processing and report generation framework with MDX components, CLI, and Web UI",
   "type": "module",
   "main": "./dist/core/index.js",
