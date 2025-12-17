@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Analysis Report</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        h1, h2 { color: #1a202c; }
+        .summary { background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 1rem; margin-bottom: 1.5rem; }
+        .insights ul { list-style-type: disc; padding-left: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Sales Analysis Report</h1>
+    <p>Generated on: {{ generatedAt }}</p>
+
+    <div class="summary">
+        <h2>Executive Summary</h2>
+        <p><strong>Total Revenue:</strong> ${{ totalRevenue }}</p>
+        <p><strong>Average Revenue per Transaction:</strong> ${{ avgRevenue }}</p>
+    </div>
+
+    <div class="insights">
+        <h2>AI-Generated Insights</h2>
+        {{ insights | safe }}
+    </div>
+
+    <h2>Top 5 Products by Revenue</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in topProducts %}
+            <tr>
+                <td>{{ item.product }}</td>
+                <td>${{ item.revenue.toFixed(2) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

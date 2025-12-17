@@ -1,58 +1,67 @@
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
-import nunjucks from "nunjucks";
-import createDebug from "debug";
+import { readFileSync } from 'fs';
+import nunjucks from 'nunjucks';
+import createDebug from 'debug';
+import { MDXRenderer } from '../mdx/mdx-renderer.js';
 
-const debug = createDebug("framework:prompt");
+const debug = createDebug('framework:template-engine');
 
+/**
+ * Renders templates using Nunjucks for text-based formats
+ * and MDX for rich component-based formats.
+ */
 export class PromptRenderer {
-  private env: nunjucks.Environment;
+  private nunjucksEnv: nunjucks.Environment;
+  private mdxRenderer: MDXRenderer;
 
   constructor() {
-    this.env = nunjucks.configure({ autoescape: false });
+    this.nunjucksEnv = nunjucks.configure({ autoescape: true });
+    this.mdxRenderer = new MDXRenderer();
     this.registerFilters();
   }
 
-  private registerFilters(): void {
-    // Round numbers
-    this.env.addFilter("round", (num: any, decimals: number = 2) => {
-      if (typeof num !== "number") return num;
-      return Number(num.toFixed(decimals));
-    });
-
-    // Format numbers with commas
-    this.env.addFilter("format_number", (num: any) => {
-      if (typeof num !== "number") return num;
-      return num.toLocaleString("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      });
-    });
-  }
-
-  async render(promptPath: string, context: any): Promise<string> {
-    debug("Rendering prompt: %s", promptPath);
-
-    const templateContent = readFileSync(promptPath, "utf-8");
-    const rendered = this.env.renderString(templateContent, context);
-
-    debug("Prompt rendered: %d characters", rendered.length);
-    return rendered;
-  }
-
-  renderString(template: string, context: any): string {
-    return this.env.renderString(template, context);
-  }
-
-  // Add these methods to your existing PromptRenderer class
-
   /**
-   * Load prompt file (helper for report engine)
+   * Renders a template file with the given data.
+   * It automatically detects the template type (.njk, .mdx) and uses the appropriate renderer.
+   *
+   * @param templatePath The absolute path to the template file.
+   * @param data The data context to pass to the template.
+   * @returns A promise that resolves to the rendered string (HTML or other text).
    */
-  async loadPromptFile(filePath: string): Promise<string> {
-    if (!existsSync(filePath)) {
-      throw new Error(`Prompt file not found: ${filePath}`);
+  public async render(templatePath: string, data: any): Promise<string> {
+    debug(`Rendering template: ${templatePath}`);
+
+    if (templatePath.endsWith('.mdx')) {
+      // Delegate to MDX renderer
+      const templateContent = readFileSync(templatePath, 'utf-8');
+      const renderedHtml = await this.mdxRenderer.render(templateContent, data);
+      debug(`MDX template rendered to ${renderedHtml.length} characters of HTML.`);
+      return renderedHtml;
     }
-    return readFileSync(filePath, "utf-8");
+
+    if (templatePath.endsWith('.njk')) {
+      // Use Nunjucks for .njk files
+      const templateContent = readFileSync(templatePath, 'utf-8');
+      const renderedString = this.nunjucksEnv.renderString(templateContent, data);
+      debug(`Nunjucks template rendered to ${renderedString.length} characters.`);
+      return renderedString;
+    }
+
+    // Default to plain text rendering for unknown file types
+    debug(`Unknown template type for ${templatePath}. Treating as plain text.`);
+    return readFileSync(templatePath, 'utf-8');
+  }
+
+  private registerFilters(): void {
+    // Example filter: format a number as a currency string
+    this.nunjucksEnv.addFilter('currency', (num: number) => {
+      if (typeof num !== 'number') return num;
+      return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    });
+
+    // Example filter: convert a string to uppercase
+    this.nunjucksEnv.addFilter('uppercase', (str: string) => {
+        if (typeof str !== 'string') return str;
+        return str.toUpperCase();
+    });
   }
 }

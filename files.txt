@@ -2,10 +2,13 @@
 ├── bin
 │   └── dproc-framework.js
 ├── CHANGELOG.md
+├── docker-compose.yml
+├── Dockerfile
 ├── files.txt
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
+├── QUICKSTART.md
 ├── README.md
 ├── src
 │   ├── cli
@@ -66,8 +69,7 @@
 │   │   ├── prompt-composer.ts
 │   │   ├── prompt-library.ts
 │   │   ├── prompt-validator.ts
-│   │   ├── structured-parser.ts
-│   │   └── templates
+│   │   └── structured-parser.ts
 │   ├── renderers
 │   │   ├── export-manager.ts
 │   │   ├── html-renderer.ts
@@ -77,8 +79,6 @@
 │   │   └── index.ts
 │   ├── services
 │   │   └── project-service.ts
-│   ├── templates
-│   │   └── builtin
 │   └── validation
 │       ├── index.ts
 │       ├── schema-inferrer.ts
@@ -107,4 +107,4 @@
     │       └── SettingsPage.tsx
     └── vite.config.ts
 
-26 directories, 82 files
+23 directories, 85 files

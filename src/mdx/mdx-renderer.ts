@@ -1,6 +1,5 @@
 import { compile } from "@mdx-js/mdx";
 import * as React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { ComponentRegistry } from "./component-registry.js";
 import createDebug from "debug";
 
@@ -90,6 +89,8 @@ export class MDXRenderer {
         ...options.data,
       });
 
+      // Dynamically import renderToStaticMarkup to avoid client-side bundling issues
+      const { renderToStaticMarkup } = await import("react-dom/server");
       const html = renderToStaticMarkup(element);
 
       debug("Rendered to HTML (%d chars)", html.length);

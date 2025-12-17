@@ -8,10 +8,8 @@ import { fileURLToPath } from "url";
 import { setupCommand } from "./commands/setup.js";
 import { useCommand } from "./commands/use.js";
 import { configCommand } from "./commands/config.js";
-import { initCommand } from "./commands/init.js";
 import { generateCommand } from "./commands/generate.js";
-import { validateCommand } from "./commands/validate.js";
-import { serveCommand } from "./commands/serve.js";
+import { listCommand } from './commands/list.js';
 
 const debug = createDebug("framework:cli");
 
@@ -45,10 +43,8 @@ program.hook("preAction", (thisCommand) => {
 program.addCommand(setupCommand);
 program.addCommand(useCommand);
 program.addCommand(configCommand);
-program.addCommand(initCommand);
 program.addCommand(generateCommand);
-program.addCommand(validateCommand);
-program.addCommand(serveCommand);
+program.addCommand(listCommand);
 
 // Error handling
 program.exitOverride();

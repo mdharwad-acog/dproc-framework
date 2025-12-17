@@ -1,0 +1,10 @@
+
+{
+  "name": "example-sales-pipeline",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "zod": "^3.22.0"
+  }
+}

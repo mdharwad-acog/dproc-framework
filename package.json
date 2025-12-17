@@ -1,7 +1,7 @@
 {
   "name": "@aganitha/dproc-framework",
   "version": "1.0.1",
-  "description": "Production-ready LLM-powered data processing and report generation framework with MDX components, CLI, and Web UI",
+  "description": "A plugin-based pipeline framework for LLM-powered data processing and report generation.",
   "type": "module",
   "main": "./dist/core/index.js",
   "types": "./dist/core/index.d.ts",
@@ -11,46 +11,33 @@
   "files": [
     "dist/**/*",
     "bin/**/*",
-    "web/dist/**/*",
-    "README.md",
-    "CHANGELOG.md"
+    "web/.next/**/*",
+    "web/public/**/*",
+    "README.md"
   ],
   "exports": {
     ".": {
       "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.js"
-    },
-    "./mdx": {
-      "types": "./dist/mdx/index.d.ts",
-      "import": "./dist/mdx/index.js"
-    },
-    "./prompts": {
-      "types": "./dist/prompts/index.d.ts",
-      "import": "./dist/prompts/index.js"
     }
   },
   "scripts": {
-    "build": "pnpm clean && pnpm build:cli && pnpm build:web",
-    "build:cli": "tsc -p tsconfig.cli.json && pnpm copy-templates",
-    "build:web": "cd web && vite build",
-    "copy-templates": "mkdir -p dist/mdx/styles && cp -r src/mdx/styles/* dist/mdx/styles/",
-    "dev": "pnpm dev:cli",
+    "build": "pnpm clean && pnpm build:framework && pnpm --filter web build",
+    "build:framework": "tsc -p tsconfig.cli.json",
+    "dev": "pnpm --filter web dev",
+    "start": "pnpm --filter web start",
     "dev:cli": "tsx src/cli/index.ts",
-    "dev:web": "cd web && vite",
     "test": "echo 'Tests pending' && exit 0",
-    "test:unit": "node --test tests/unit/**/*.test.js",
-    "clean": "rm -rf dist web/dist *.tgz",
+    "clean": "rm -rf dist web/.next *.tgz",
     "prepublishOnly": "pnpm build",
-    "prepack": "pnpm build",
-    "postpack": "echo '✅ Package ready for publish'",
     "verify": "npm pack --dry-run"
   },
   "keywords": [
     "llm",
-    "mdx",
-    "react-ssr",
-    "cli",
-    "typescript"
+    "pipeline",
+    "framework",
+    "automation",
+    "reports"
   ],
   "author": {
     "name": "mdharwad-acog",
@@ -60,18 +47,11 @@
     "type": "git",
     "url": "git+https://github.com/mdharwad-acog/dproc-framework.git"
   },
-  "bugs": {
-    "url": "https://github.com/mdharwad-acog/dproc-framework/issues"
-  },
-  "homepage": "https://github.com/mdharwad-acog/dproc-framework#readme",
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
   "packageManager": "pnpm@10.24.0",
-  "publishConfig": {
-    "registry": "https://npm.aganitha.ai/"
-  },
   "dependencies": {
     "@ai-sdk/google": "^2.0.44",
     "@ai-sdk/openai": "^2.0.77",
@@ -79,56 +59,29 @@
     "@mdx-js/react": "^3.1.1",
     "ai": "^5.0.108",
     "chalk": "^5.6.2",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "commander": "^14.0.2",
-    "cors": "^2.8.5",
-    "csv-parse": "^6.1.0",
     "debug": "^4.4.3",
-    "express": "^5.2.1",
     "inquirer": "^13.0.2",
-    "lucide-react": "^0.556.0",
-    "marked": "^17.0.1",
     "nunjucks": "^3.2.4",
     "ora": "^9.0.0",
     "playwright": "^1.57.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "react-markdown": "^10.1.0",
-    "react-router-dom": "^7.10.1",
-    "recharts": "^3.5.1",
-    "remark-gfm": "^4.0.1",
-    "tailwind-merge": "^3.4.0",
-    "yaml": "^2.8.2",
+    "uuid": "^13.0.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.17",
-    "@types/cors": "^2.8.19",
     "@types/debug": "^4.1.12",
-    "@types/express": "^5.0.6",
     "@types/node": "^24.10.1",
     "@types/nunjucks": "^3.2.6",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
-    "react-router-dom": "^7.10.1",
-    "tailwindcss": "^4.1.17",
+    "@types/uuid": "^11.0.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vite": "^6.4.1",
-    "vite-tsconfig-paths": "^5.1.4"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
   }
 }
